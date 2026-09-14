@@ -67,7 +67,7 @@ function ListProperty() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    property_type: PROPERTY_TYPES[0],
+    property_type: PROPERTY_TYPES[0] as string,
     rent_ugx: "",
     deposit_months: "1",
     bedrooms: "1",
