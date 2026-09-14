@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const PROPERTY_CARD_SELECT =
-  "id, title, rent_ugx, bedrooms, bathrooms, parking_spaces, landlord_verified, has_units, units_available, created_at, areas(name, slug, cities(name, slug)), property_images(url)";
+  "id, title, property_type, rent_ugx, bedrooms, bathrooms, parking_spaces, landlord_verified, has_units, units_available, created_at, areas(name, slug, cities(name, slug)), property_images(url)";
 
 export function useRegions() {
   return useQuery({
