@@ -10,33 +10,69 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BrowseIndexRouteImport } from './routes/browse.index'
+import { Route as BrowseRegionSlugRouteImport } from './routes/browse.$regionSlug'
+import { Route as BrowseRegionSlugCitySlugRouteImport } from './routes/browse.$regionSlug.$citySlug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrowseIndexRoute = BrowseIndexRouteImport.update({
+  id: '/browse/',
+  path: '/browse/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrowseRegionSlugRoute = BrowseRegionSlugRouteImport.update({
+  id: '/browse/$regionSlug',
+  path: '/browse/$regionSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrowseRegionSlugCitySlugRoute =
+  BrowseRegionSlugCitySlugRouteImport.update({
+    id: '/$citySlug',
+    path: '/$citySlug',
+    getParentRoute: () => BrowseRegionSlugRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/browse/': typeof BrowseIndexRoute
+  '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/browse': typeof BrowseIndexRoute
+  '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/browse/': typeof BrowseIndexRoute
+  '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    '/' | '/browse/$regionSlug' | '/browse/' | '/browse/$regionSlug/$citySlug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/browse/$regionSlug' | '/browse' | '/browse/$regionSlug/$citySlug'
+  id:
+    | '__root__'
+    | '/'
+    | '/browse/$regionSlug'
+    | '/browse/'
+    | '/browse/$regionSlug/$citySlug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BrowseRegionSlugRoute: typeof BrowseRegionSlugRouteWithChildren
+  BrowseIndexRoute: typeof BrowseIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +84,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/browse/': {
+      id: '/browse/'
+      path: '/browse'
+      fullPath: '/browse/'
+      preLoaderRoute: typeof BrowseIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/browse/$regionSlug': {
+      id: '/browse/$regionSlug'
+      path: '/browse/$regionSlug'
+      fullPath: '/browse/$regionSlug'
+      preLoaderRoute: typeof BrowseRegionSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/browse/$regionSlug/$citySlug': {
+      id: '/browse/$regionSlug/$citySlug'
+      path: '/$citySlug'
+      fullPath: '/browse/$regionSlug/$citySlug'
+      preLoaderRoute: typeof BrowseRegionSlugCitySlugRouteImport
+      parentRoute: typeof BrowseRegionSlugRoute
+    }
   }
 }
 
+interface BrowseRegionSlugRouteChildren {
+  BrowseRegionSlugCitySlugRoute: typeof BrowseRegionSlugCitySlugRoute
+}
+
+const BrowseRegionSlugRouteChildren: BrowseRegionSlugRouteChildren = {
+  BrowseRegionSlugCitySlugRoute: BrowseRegionSlugCitySlugRoute,
+}
+
+const BrowseRegionSlugRouteWithChildren =
+  BrowseRegionSlugRoute._addFileChildren(BrowseRegionSlugRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BrowseRegionSlugRoute: BrowseRegionSlugRouteWithChildren,
+  BrowseIndexRoute: BrowseIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

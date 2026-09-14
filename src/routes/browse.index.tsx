@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/pangisa/bottom-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLiveCounts, useRegions } from "@/lib/queries";
 
-export const Route = createFileRoute("/browse")({
+export const Route = createFileRoute("/browse/")({
   head: () => ({
     meta: [
       { title: "Choose a region — Pangisa rentals in Uganda" },
