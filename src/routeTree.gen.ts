@@ -10,33 +10,172 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authenticated/affiliates'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedListPropertyRouteImport } from './routes/_authenticated/list-property'
+import { Route as BrowseIndexRouteImport } from './routes/browse.index'
+import { Route as BrowseRegionSlugRouteImport } from './routes/browse.$regionSlug'
+import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
+import { Route as RentalsAreaSlugRouteImport } from './routes/rentals.$areaSlug'
+import { Route as BrowseRegionSlugCitySlugRouteImport } from './routes/browse.$regionSlug.$citySlug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAffiliatesRoute = AuthenticatedAffiliatesRouteImport.update({
+  id: '/affiliates',
+  path: '/affiliates',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedListPropertyRoute =
+  AuthenticatedListPropertyRouteImport.update({
+    id: '/list-property',
+    path: '/list-property',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const BrowseIndexRoute = BrowseIndexRouteImport.update({
+  id: '/browse/',
+  path: '/browse/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrowseRegionSlugRoute = BrowseRegionSlugRouteImport.update({
+  id: '/browse/$regionSlug',
+  path: '/browse/$regionSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
+  id: '/property/$propertyId',
+  path: '/property/$propertyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RentalsAreaSlugRoute = RentalsAreaSlugRouteImport.update({
+  id: '/rentals/$areaSlug',
+  path: '/rentals/$areaSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrowseRegionSlugCitySlugRoute =
+  BrowseRegionSlugCitySlugRouteImport.update({
+    id: '/$citySlug',
+    path: '/$citySlug',
+    getParentRoute: () => BrowseRegionSlugRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/account': typeof AuthenticatedAccountRoute
+  '/affiliates': typeof AuthenticatedAffiliatesRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/list-property': typeof AuthenticatedListPropertyRoute
+  '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
+  '/browse/': typeof BrowseIndexRoute
+  '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/account': typeof AuthenticatedAccountRoute
+  '/affiliates': typeof AuthenticatedAffiliatesRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/list-property': typeof AuthenticatedListPropertyRoute
+  '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
+  '/browse': typeof BrowseIndexRoute
+  '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/account': typeof AuthenticatedAccountRoute
+  '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/list-property': typeof AuthenticatedListPropertyRoute
+  '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
+  '/browse/': typeof BrowseIndexRoute
+  '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/account'
+    | '/affiliates'
+    | '/dashboard'
+    | '/list-property'
+    | '/browse/$regionSlug'
+    | '/property/$propertyId'
+    | '/rentals/$areaSlug'
+    | '/browse/'
+    | '/browse/$regionSlug/$citySlug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/account'
+    | '/affiliates'
+    | '/dashboard'
+    | '/list-property'
+    | '/browse/$regionSlug'
+    | '/property/$propertyId'
+    | '/rentals/$areaSlug'
+    | '/browse'
+    | '/browse/$regionSlug/$citySlug'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/account'
+    | '/_authenticated/affiliates'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/list-property'
+    | '/browse/$regionSlug'
+    | '/property/$propertyId'
+    | '/rentals/$areaSlug'
+    | '/browse/'
+    | '/browse/$regionSlug/$citySlug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  BrowseRegionSlugRoute: typeof BrowseRegionSlugRouteWithChildren
+  PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
+  RentalsAreaSlugRoute: typeof RentalsAreaSlugRoute
+  BrowseIndexRoute: typeof BrowseIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +187,122 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/affiliates': {
+      id: '/_authenticated/affiliates'
+      path: '/affiliates'
+      fullPath: '/affiliates'
+      preLoaderRoute: typeof AuthenticatedAffiliatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/list-property': {
+      id: '/_authenticated/list-property'
+      path: '/list-property'
+      fullPath: '/list-property'
+      preLoaderRoute: typeof AuthenticatedListPropertyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/browse/': {
+      id: '/browse/'
+      path: '/browse'
+      fullPath: '/browse/'
+      preLoaderRoute: typeof BrowseIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/browse/$regionSlug': {
+      id: '/browse/$regionSlug'
+      path: '/browse/$regionSlug'
+      fullPath: '/browse/$regionSlug'
+      preLoaderRoute: typeof BrowseRegionSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property/$propertyId': {
+      id: '/property/$propertyId'
+      path: '/property/$propertyId'
+      fullPath: '/property/$propertyId'
+      preLoaderRoute: typeof PropertyPropertyIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rentals/$areaSlug': {
+      id: '/rentals/$areaSlug'
+      path: '/rentals/$areaSlug'
+      fullPath: '/rentals/$areaSlug'
+      preLoaderRoute: typeof RentalsAreaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/browse/$regionSlug/$citySlug': {
+      id: '/browse/$regionSlug/$citySlug'
+      path: '/$citySlug'
+      fullPath: '/browse/$regionSlug/$citySlug'
+      preLoaderRoute: typeof BrowseRegionSlugCitySlugRouteImport
+      parentRoute: typeof BrowseRegionSlugRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedAffiliatesRoute: typeof AuthenticatedAffiliatesRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedListPropertyRoute: typeof AuthenticatedListPropertyRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedAffiliatesRoute: AuthenticatedAffiliatesRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedListPropertyRoute: AuthenticatedListPropertyRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface BrowseRegionSlugRouteChildren {
+  BrowseRegionSlugCitySlugRoute: typeof BrowseRegionSlugCitySlugRoute
+}
+
+const BrowseRegionSlugRouteChildren: BrowseRegionSlugRouteChildren = {
+  BrowseRegionSlugCitySlugRoute: BrowseRegionSlugCitySlugRoute,
+}
+
+const BrowseRegionSlugRouteWithChildren =
+  BrowseRegionSlugRoute._addFileChildren(BrowseRegionSlugRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  BrowseRegionSlugRoute: BrowseRegionSlugRouteWithChildren,
+  PropertyPropertyIdRoute: PropertyPropertyIdRoute,
+  RentalsAreaSlugRoute: RentalsAreaSlugRoute,
+  BrowseIndexRoute: BrowseIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
