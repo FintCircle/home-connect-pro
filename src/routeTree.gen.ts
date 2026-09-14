@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BrowseIndexRouteImport } from './routes/browse.index'
 import { Route as BrowseRegionSlugRouteImport } from './routes/browse.$regionSlug'
+import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
 import { Route as RentalsAreaSlugRouteImport } from './routes/rentals.$areaSlug'
 import { Route as BrowseRegionSlugCitySlugRouteImport } from './routes/browse.$regionSlug.$citySlug'
 
@@ -30,6 +31,11 @@ const BrowseRegionSlugRoute = BrowseRegionSlugRouteImport.update({
   path: '/browse/$regionSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
+  id: '/property/$propertyId',
+  path: '/property/$propertyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RentalsAreaSlugRoute = RentalsAreaSlugRouteImport.update({
   id: '/rentals/$areaSlug',
   path: '/rentals/$areaSlug',
@@ -45,6 +51,7 @@ const BrowseRegionSlugCitySlugRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse/': typeof BrowseIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
@@ -52,6 +59,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse': typeof BrowseIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse/': typeof BrowseIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
@@ -69,6 +78,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/browse/$regionSlug'
+    | '/property/$propertyId'
     | '/rentals/$areaSlug'
     | '/browse/'
     | '/browse/$regionSlug/$citySlug'
@@ -76,6 +86,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/browse/$regionSlug'
+    | '/property/$propertyId'
     | '/rentals/$areaSlug'
     | '/browse'
     | '/browse/$regionSlug/$citySlug'
@@ -83,6 +94,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/browse/$regionSlug'
+    | '/property/$propertyId'
     | '/rentals/$areaSlug'
     | '/browse/'
     | '/browse/$regionSlug/$citySlug'
@@ -91,6 +103,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrowseRegionSlugRoute: typeof BrowseRegionSlugRouteWithChildren
+  PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
   RentalsAreaSlugRoute: typeof RentalsAreaSlugRoute
   BrowseIndexRoute: typeof BrowseIndexRoute
 }
@@ -116,6 +129,13 @@ declare module '@tanstack/react-router' {
       path: '/browse/$regionSlug'
       fullPath: '/browse/$regionSlug'
       preLoaderRoute: typeof BrowseRegionSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property/$propertyId': {
+      id: '/property/$propertyId'
+      path: '/property/$propertyId'
+      fullPath: '/property/$propertyId'
+      preLoaderRoute: typeof PropertyPropertyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rentals/$areaSlug': {
@@ -149,6 +169,7 @@ const BrowseRegionSlugRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrowseRegionSlugRoute: BrowseRegionSlugRouteWithChildren,
+  PropertyPropertyIdRoute: PropertyPropertyIdRoute,
   RentalsAreaSlugRoute: RentalsAreaSlugRoute,
   BrowseIndexRoute: BrowseIndexRoute,
 }
