@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { property: "og:description", content: "Manage your Pangisa listings and unlocks." },
     ],
   }),
-  component: Dashboard;
+  component: Dashboard,
 });
 
 function Dashboard() {
