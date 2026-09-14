@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BrowseIndexRouteImport } from './routes/browse.index'
 import { Route as BrowseRegionSlugRouteImport } from './routes/browse.$regionSlug'
+import { Route as RentalsAreaSlugRouteImport } from './routes/rentals.$areaSlug'
 import { Route as BrowseRegionSlugCitySlugRouteImport } from './routes/browse.$regionSlug.$citySlug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const BrowseRegionSlugRoute = BrowseRegionSlugRouteImport.update({
   path: '/browse/$regionSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RentalsAreaSlugRoute = RentalsAreaSlugRouteImport.update({
+  id: '/rentals/$areaSlug',
+  path: '/rentals/$areaSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrowseRegionSlugCitySlugRoute =
   BrowseRegionSlugCitySlugRouteImport.update({
     id: '/$citySlug',
@@ -39,12 +45,14 @@ const BrowseRegionSlugCitySlugRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse/': typeof BrowseIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse': typeof BrowseIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
@@ -52,19 +60,30 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse/': typeof BrowseIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/browse/$regionSlug' | '/browse/' | '/browse/$regionSlug/$citySlug'
+    | '/'
+    | '/browse/$regionSlug'
+    | '/rentals/$areaSlug'
+    | '/browse/'
+    | '/browse/$regionSlug/$citySlug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/browse/$regionSlug' | '/browse' | '/browse/$regionSlug/$citySlug'
+  to:
+    | '/'
+    | '/browse/$regionSlug'
+    | '/rentals/$areaSlug'
+    | '/browse'
+    | '/browse/$regionSlug/$citySlug'
   id:
     | '__root__'
     | '/'
     | '/browse/$regionSlug'
+    | '/rentals/$areaSlug'
     | '/browse/'
     | '/browse/$regionSlug/$citySlug'
   fileRoutesById: FileRoutesById
@@ -72,6 +91,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrowseRegionSlugRoute: typeof BrowseRegionSlugRouteWithChildren
+  RentalsAreaSlugRoute: typeof RentalsAreaSlugRoute
   BrowseIndexRoute: typeof BrowseIndexRoute
 }
 
@@ -98,6 +118,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrowseRegionSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rentals/$areaSlug': {
+      id: '/rentals/$areaSlug'
+      path: '/rentals/$areaSlug'
+      fullPath: '/rentals/$areaSlug'
+      preLoaderRoute: typeof RentalsAreaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/browse/$regionSlug/$citySlug': {
       id: '/browse/$regionSlug/$citySlug'
       path: '/$citySlug'
@@ -122,6 +149,7 @@ const BrowseRegionSlugRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrowseRegionSlugRoute: BrowseRegionSlugRouteWithChildren,
+  RentalsAreaSlugRoute: RentalsAreaSlugRoute,
   BrowseIndexRoute: BrowseIndexRoute,
 }
 export const routeTree = rootRouteImport
