@@ -1,0 +1,18 @@
+name = "home-connect-pro"
+workers_dev = false
+compatibility_date = "2026-09-15"
+
+# Keep the existing custom domains attached to this Worker on deployment.
+routes = [
+  { pattern = "pangisanow.com", custom_domain = true },
+  { pattern = "www.pangisanow.com", custom_domain = true },
+]
+
+[[d1_databases]]
+binding = "D1"
+database_name = "my-pangisa"
+database_id = "9f15d609-0033-476e-a5f6-8c32cf92aa5e"
+
+[[r2_buckets]]
+binding = "PANMEDIA"
+bucket_name = "pan"
