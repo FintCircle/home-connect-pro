@@ -1,32 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
-import type { User } from "@supabase/supabase-js";
-
-import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@clerk/tanstack-react-start";
 
 export function useAuthUser() {
-  return useQuery<User | null>({
-    queryKey: ["auth-user"],
-    queryFn: async () => {
-      const { data } = await supabase.auth.getUser();
-      return data.user ?? null;
-    },
-    staleTime: 30_000,
-  });
+  const { user, isLoaded } = useUser();
+  return {
+    data: user ?? null,
+    isLoading: !isLoaded,
+  };
 }
 
 export function useProfile() {
   const { data: user } = useAuthUser();
-  return useQuery({
-    queryKey: ["profile", user?.id],
-    enabled: Boolean(user?.id),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
+  return {
+    data: user
+      ? {
+          id: user.id,
+          full_name: user.fullName,
+          avatar_url: user.imageUrl,
+          email: user.primaryEmailAddress?.emailAddress ?? null,
+          phone: user.primaryPhoneNumber?.phoneNumber ?? null,
+        }
+      : null,
+    isLoading: false,
+  };
 }
