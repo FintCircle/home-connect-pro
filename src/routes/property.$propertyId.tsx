@@ -165,7 +165,7 @@ function PropertyDetail() {
                   index === active ? "border-primary" : "border-transparent"
                 }`}
               >
-                <img src={url} alt="" className="size-full object-cover" />
+                <img src={url ?? undefined} alt="" className="size-full object-cover" />
               </button>
             ))}
           </div>
