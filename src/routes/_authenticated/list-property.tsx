@@ -281,8 +281,14 @@ function ListProperty() {
               ) : (
                 <Crosshair className="mr-2 size-4" />
               )}
-              {pin ? "Location pinned — tap to update" : "Drop my current location"}
+              {pin ? "Use my current location again" : "Drop my current location"}
             </Button>
+            <MapPicker value={pin} onChange={setPin} />
+            <p className="text-xs text-muted-foreground">
+              {pin
+                ? `Pin set at ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)} — tap the map or drag the pin to adjust.`
+                : "Or tap the map exactly where the property is."}
+            </p>
             <Input
               placeholder="Exact address (plot, road, zone)"
               value={form.address_exact}
