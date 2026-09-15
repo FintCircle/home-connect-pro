@@ -1,3 +1,4 @@
+import { useClerk } from "@clerk/tanstack-react-start";
 import { Link, useRouter } from "@tanstack/react-router";
 import { ChevronLeft, Menu } from "lucide-react";
 import { useState } from "react";
@@ -5,7 +6,6 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuthUser } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function Logo() {
@@ -38,12 +38,13 @@ export function AppHeader({ title, back }: { title?: string; back?: boolean }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const { data: user } = useAuthUser();
+  const { signOut: clerkSignOut } = useClerk();
   const queryClient = useQueryClient();
 
   async function signOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
-    await supabase.auth.signOut();
+    await clerkSignOut();
     setOpen(false);
     router.navigate({ to: "/auth", replace: true });
   }
