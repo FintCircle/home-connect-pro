@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { AppHeader } from "@/components/pangisa/app-header";
 import { BottomNav } from "@/components/pangisa/bottom-nav";
+import { MapPicker } from "@/components/pangisa/map-picker";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -163,22 +164,42 @@ function ListProperty() {
 
   function dropPin() {
     if (!navigator.geolocation) {
-      toast.error("Your phone did not allow location. Type the address instead.");
+      toast.error("Your phone does not support location. Tap the map to drop the pin instead.");
       return;
     }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setPin({ lat: position.coords.latitude, lng: position.coords.longitude });
-        setLocating(false);
-        toast.success("Location pinned. Tenants only see it after paying.");
-      },
-      () => {
-        setLocating(false);
-        toast.error("Could not read your location. Type the address instead.");
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
+    const onSuccess = (position: GeolocationPosition) => {
+      setPin({ lat: position.coords.latitude, lng: position.coords.longitude });
+      setLocating(false);
+      toast.success("Location pinned. Drag the pin to fine-tune the exact spot.");
+    };
+    const onFailure = (error: GeolocationPositionError) => {
+      // High-accuracy GPS can time out indoors — retry once with a rougher fix.
+      if (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE) {
+        navigator.geolocation.getCurrentPosition(onSuccess, onFinalFailure, {
+          enableHighAccuracy: false,
+          timeout: 20000,
+          maximumAge: 60000,
+        });
+        return;
+      }
+      onFinalFailure(error);
+    };
+    const onFinalFailure = (error: GeolocationPositionError) => {
+      setLocating(false);
+      if (error.code === error.PERMISSION_DENIED) {
+        toast.error(
+          "Location permission is blocked. Allow location for this site in your browser settings, or tap the map to drop the pin.",
+        );
+      } else {
+        toast.error("Could not read your location. Tap the map to drop the pin instead.");
+      }
+    };
+    navigator.geolocation.getCurrentPosition(onSuccess, onFailure, {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0,
+    });
   }
 
   const regionOptions = regions ?? [];
