@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -32,6 +32,14 @@ function Account() {
   const queryClient = useQueryClient();
   const { data: user } = useAuthUser();
   const { data: profile } = useProfile();
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin", user?.id],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { data } = await supabase.from("user_roles").select("id").eq("user_id", user!.id).eq("role", "admin").maybeSingle();
+      return Boolean(data);
+    },
+  });
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
@@ -125,6 +133,15 @@ function Account() {
             Your referral code is{" "}
             <span className="font-semibold text-primary">{profile.referral_code}</span>
           </p>
+        ) : null}
+
+        {isAdmin ? (
+          <Link
+            to="/admin"
+            className="block rounded-md border border-primary/30 bg-primary/5 px-4 py-3 text-center text-sm font-semibold text-primary"
+          >
+            Open admin area
+          </Link>
         ) : null}
 
         <Button variant="outline" className="w-full" onClick={signOut}>
