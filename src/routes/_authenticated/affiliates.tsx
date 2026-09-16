@@ -151,17 +151,24 @@ function Affiliates() {
             disabled={
               withdraw.isPending ||
               payoutPhone.trim().length < 9 ||
+              (earnings.data?.pending ?? 0) > 0 ||
               (earnings.data?.available ?? 0) < MIN_WITHDRAWAL_UGX
             }
             onClick={() => withdraw.mutate()}
           >
-            Request withdrawal
+            {(earnings.data?.pending ?? 0) > 0 ? "Request being reviewed" : "Request withdrawal"}
           </Button>
+          {(earnings.data?.pending ?? 0) > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {formatUgx(earnings.data?.pending ?? 0)} is waiting for approval. Once it is approved
+              the money is sent to your number and moves to “Paid to you”.
+            </p>
+          ) : null}
           {earnings.data?.payouts?.length ? (
             <ul className="space-y-1 pt-2 text-xs text-muted-foreground">
               {earnings.data.payouts.map((payout, index) => (
                 <li key={index}>
-                  {formatUgx(payout.amount_ugx)} — {payout.status} ·{" "}
+                  {formatUgx(payout.amount_ugx)} — {PAYOUT_LABEL[payout.status] ?? payout.status} ·{" "}
                   {new Date(payout.created_at).toLocaleDateString()}
                 </li>
               ))}
