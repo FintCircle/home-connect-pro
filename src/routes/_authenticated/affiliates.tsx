@@ -45,11 +45,14 @@ function Affiliates() {
     queryKey: ["earnings", user?.id],
     enabled: Boolean(user?.id),
     queryFn: async () => {
-      const [{ data: rows }, { data: payouts }, { count: referredCount }] = await Promise.all([
+      const [{ data: rows, error: earningsError }, { data: payouts, error: payoutsError }, { data: referredCount, error: referralError }] = await Promise.all([
         supabase.from("referral_earnings").select("amount_ugx, created_at"),
         supabase.from("withdrawals").select("amount_ugx, status, created_at"),
         supabase.rpc("get_my_referral_count"),
       ]);
+      if (earningsError) throw earningsError;
+      if (payoutsError) throw payoutsError;
+      if (referralError) throw referralError;
       const earned = (rows ?? []).reduce((sum, row) => sum + Number(row.amount_ugx), 0);
       const claimed = (payouts ?? [])
         .filter((row) => row.status !== "rejected")
