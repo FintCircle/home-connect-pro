@@ -532,6 +532,10 @@ export type Database = {
         Args: { p_code: string }
         Returns: boolean
       }
+      get_my_referral_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_referral_leaders: {
         Args: Record<PropertyKey, never>
         Returns: {

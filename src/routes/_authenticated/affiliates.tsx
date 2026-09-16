@@ -48,7 +48,7 @@ function Affiliates() {
       const [{ data: rows }, { data: payouts }, { count: referredCount }] = await Promise.all([
         supabase.from("referral_earnings").select("amount_ugx, created_at"),
         supabase.from("withdrawals").select("amount_ugx, status, created_at"),
-        supabase.from("referral_relationships").select("id", { count: "exact", head: true }).eq("referrer_id", user!.id),
+        supabase.rpc("get_my_referral_count"),
       ]);
       const earned = (rows ?? []).reduce((sum, row) => sum + Number(row.amount_ugx), 0);
       const claimed = (payouts ?? [])
