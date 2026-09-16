@@ -62,7 +62,7 @@ function Index() {
         <section className="relative h-64 overflow-hidden">
           <img
             src={heroImage}
-            alt="Homes across a Kampala neighbourhood at sunset"
+            alt="Aerial view of Kampala neighbourhoods under dramatic clouds"
             width={1280}
             height={960}
             className="size-full object-cover"
