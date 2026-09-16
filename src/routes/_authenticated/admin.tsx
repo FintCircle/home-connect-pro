@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { reviewWithdrawal } from "@/lib/pangisa.functions";
 import { Check, EyeOff, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +25,7 @@ function Admin() {
   const { data: user, isLoading: authLoading } = useAuthUser();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const queryClient = useQueryClient();
+  const reviewFn = useServerFn(reviewWithdrawal);
 
   useEffect(() => {
     if (authLoading) return;
@@ -67,11 +70,16 @@ function Admin() {
   });
 
   const updateWithdrawal = useMutation({
-    mutationFn: async (input: { id: string; status: "paid" | "rejected"; admin_note: string }) => {
-      const { error } = await supabase.from("withdrawals").update({ ...input, reviewed_at: new Date().toISOString(), reviewed_by: user!.id }).eq("id", input.id);
-      if (error) throw error;
+    mutationFn: (input: { id: string; status: "paid" | "rejected"; note: string }) =>
+      reviewFn({ data: input }),
+    onSuccess: (result) => {
+      toast.success(
+        result.status === "paid"
+          ? `Approved — ${formatUgx(result.amount)} now shows in their balance as paid`
+          : "Withdrawal rejected — the amount is back in their available balance",
+      );
+      queryClient.invalidateQueries();
     },
-    onSuccess: () => { toast.success("Withdrawal updated"); queryClient.invalidateQueries({ queryKey: ["admin-data"] }); },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -93,7 +101,7 @@ function Admin() {
         <section><h2 className="font-display text-lg font-bold">Signed-up users ({data.data?.profiles.length ?? 0})</h2><div className="mt-3 space-y-2">{data.data?.profiles.map((profile) => <div key={profile.id} className="surface-card flex items-center justify-between gap-3 p-4 text-sm"><div><p className="font-semibold">{profile.full_name || "Unnamed user"}</p><p className="text-xs text-muted-foreground">{profile.phone || "No phone"} · {profile.referral_code}</p></div><span className="text-xs text-muted-foreground">{new Date(profile.created_at).toLocaleDateString()}</span></div>)}</div></section>
         <section><h2 className="font-display text-lg font-bold">Referral leaders</h2><div className="mt-3 space-y-2">{data.data?.referralSummary.map((leader) => <div key={leader.referrer_id} className="surface-card flex items-center justify-between p-4 text-sm"><div><p className="font-semibold">{leader.full_name || "Unnamed user"}</p><p className="text-xs text-muted-foreground">{leader.referral_code || "No code"}</p></div><span className="font-display font-bold text-primary">{leader.joined_count} referred</span></div>)}</div></section>
         <section><h2 className="font-display text-lg font-bold">Listings</h2><div className="mt-3 space-y-2">{data.data?.properties.map((property) => <div key={property.id} className="surface-card flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="font-semibold">{property.title}</p><p className="text-xs text-muted-foreground">{formatUgx(property.rent_ugx)} · {property.areas?.name}, {property.areas?.cities?.name}</p></div><div className="flex items-center gap-2"><span className="rounded-full bg-muted px-2 py-1 text-[0.65rem] uppercase">{property.status}</span><Select value={property.status} onValueChange={(status) => moderate.mutate({ id: property.id, status: status as "live" | "paused" | "taken" })}><SelectTrigger className="h-8 w-28 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="live">Publish</SelectItem><SelectItem value="paused">Unpublish</SelectItem><SelectItem value="taken">Taken</SelectItem></SelectContent></Select></div></div>)}</div></section>
-        <section><h2 className="font-display text-lg font-bold">Withdrawal requests</h2><div className="mt-3 space-y-2">{data.data?.withdrawals.map((withdrawal) => <WithdrawalRow key={withdrawal.id} withdrawal={withdrawal} onUpdate={(status, note) => updateWithdrawal.mutate({ id: withdrawal.id, status, admin_note: note })} />)}</div></section>
+        <section><h2 className="font-display text-lg font-bold">Withdrawal requests</h2><div className="mt-3 space-y-2">{data.data?.withdrawals.map((withdrawal) => <WithdrawalRow key={withdrawal.id} withdrawal={withdrawal} onUpdate={(status, note) => updateWithdrawal.mutate({ id: withdrawal.id, status, note })} />)}</div></section>
       </main><BottomNav />
     </div>
   );

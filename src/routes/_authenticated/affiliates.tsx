@@ -34,6 +34,12 @@ export const Route = createFileRoute("/_authenticated/affiliates")({
   component: Affiliates,
 });
 
+const PAYOUT_LABEL: Record<string, string> = {
+  requested: "waiting for approval",
+  paid: "paid to you",
+  rejected: "not approved",
+};
+
 function Affiliates() {
   const queryClient = useQueryClient();
   const { data: user } = useAuthUser();
@@ -54,10 +60,20 @@ function Affiliates() {
       if (payoutsError) throw payoutsError;
       if (referralError) throw referralError;
       const earned = (rows ?? []).reduce((sum, row) => sum + Number(row.amount_ugx), 0);
-      const claimed = (payouts ?? [])
-        .filter((row) => row.status !== "rejected")
-        .reduce((sum, row) => sum + Number(row.amount_ugx), 0);
-      return { earned, available: Math.max(0, earned - claimed), count: referredCount ?? 0, payouts: payouts ?? [] };
+      const total = (status: string) =>
+        (payouts ?? [])
+          .filter((row) => row.status === status)
+          .reduce((sum, row) => sum + Number(row.amount_ugx), 0);
+      const pending = total("requested");
+      const paid = total("paid");
+      return {
+        earned,
+        pending,
+        paid,
+        available: Math.max(0, earned - pending - paid),
+        count: referredCount ?? 0,
+        payouts: payouts ?? [],
+      };
     },
   });
 
@@ -107,11 +123,18 @@ function Affiliates() {
           </div>
         </section>
 
-        <section className="grid grid-cols-3 gap-2">
+        <section className="grid grid-cols-2 gap-2">
           <Stat label="People joined" value={String(earnings.data?.count ?? 0)} />
           <Stat label="Earned" value={formatUgx(earnings.data?.earned ?? 0)} />
           <Stat label="Available" value={formatUgx(earnings.data?.available ?? 0)} />
+          <Stat label="Waiting for approval" value={formatUgx(earnings.data?.pending ?? 0)} />
+          <Stat label="Paid to you" value={formatUgx(earnings.data?.paid ?? 0)} />
+          <Stat
+            label="Next payout at"
+            value={formatUgx(MIN_WITHDRAWAL_UGX)}
+          />
         </section>
+
 
         <section className="surface-card space-y-3 p-4">
           <h2 className="font-display text-base font-semibold">Withdraw</h2>
@@ -134,17 +157,24 @@ function Affiliates() {
             disabled={
               withdraw.isPending ||
               payoutPhone.trim().length < 9 ||
+              (earnings.data?.pending ?? 0) > 0 ||
               (earnings.data?.available ?? 0) < MIN_WITHDRAWAL_UGX
             }
             onClick={() => withdraw.mutate()}
           >
-            Request withdrawal
+            {(earnings.data?.pending ?? 0) > 0 ? "Request being reviewed" : "Request withdrawal"}
           </Button>
+          {(earnings.data?.pending ?? 0) > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {formatUgx(earnings.data?.pending ?? 0)} is waiting for approval. Once it is approved
+              the money is sent to your number and moves to “Paid to you”.
+            </p>
+          ) : null}
           {earnings.data?.payouts?.length ? (
             <ul className="space-y-1 pt-2 text-xs text-muted-foreground">
               {earnings.data.payouts.map((payout, index) => (
                 <li key={index}>
-                  {formatUgx(payout.amount_ugx)} — {payout.status} ·{" "}
+                  {formatUgx(payout.amount_ugx)} — {PAYOUT_LABEL[payout.status] ?? payout.status} ·{" "}
                   {new Date(payout.created_at).toLocaleDateString()}
                 </li>
               ))}

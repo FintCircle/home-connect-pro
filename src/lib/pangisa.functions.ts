@@ -258,3 +258,53 @@ export const requestWithdrawal = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { amount: available };
   });
+
+/**
+ * Admin approves (pays) or rejects a withdrawal request. Approving moves the
+ * amount into the person's paid-out balance; rejecting returns it to their
+ * available balance.
+ */
+export const reviewWithdrawal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["paid", "rejected"]),
+        note: z.string().max(500).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Only admins can review withdrawals");
+
+    const db = await admin();
+    const { data: request, error: readError } = await db
+      .from("withdrawals")
+      .select("id, status, amount_ugx")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (readError) throw new Error(readError.message);
+    if (!request) throw new Error("Withdrawal request not found");
+    if (request.status !== "requested") {
+      throw new Error("This withdrawal has already been reviewed");
+    }
+
+    const { error } = await db
+      .from("withdrawals")
+      .update({
+        status: data.status,
+        admin_note: data.note?.trim() ? data.note.trim() : null,
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: context.userId,
+      })
+      .eq("id", data.id)
+      .eq("status", "requested");
+    if (error) throw new Error(error.message);
+
+    return { amount: Number(request.amount_ugx), status: data.status };
+  });
