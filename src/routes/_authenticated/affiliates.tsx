@@ -34,6 +34,12 @@ export const Route = createFileRoute("/_authenticated/affiliates")({
   component: Affiliates,
 });
 
+const PAYOUT_LABEL: Record<string, string> = {
+  requested: "waiting for approval",
+  paid: "paid to you",
+  rejected: "not approved",
+};
+
 function Affiliates() {
   const queryClient = useQueryClient();
   const { data: user } = useAuthUser();

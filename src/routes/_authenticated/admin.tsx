@@ -67,11 +67,16 @@ function Admin() {
   });
 
   const updateWithdrawal = useMutation({
-    mutationFn: async (input: { id: string; status: "paid" | "rejected"; admin_note: string }) => {
-      const { error } = await supabase.from("withdrawals").update({ ...input, reviewed_at: new Date().toISOString(), reviewed_by: user!.id }).eq("id", input.id);
-      if (error) throw error;
+    mutationFn: (input: { id: string; status: "paid" | "rejected"; note: string }) =>
+      reviewFn({ data: input }),
+    onSuccess: (result) => {
+      toast.success(
+        result.status === "paid"
+          ? `Approved — ${formatUgx(result.amount)} now shows in their balance as paid`
+          : "Withdrawal rejected — the amount is back in their available balance",
+      );
+      queryClient.invalidateQueries();
     },
-    onSuccess: () => { toast.success("Withdrawal updated"); queryClient.invalidateQueries({ queryKey: ["admin-data"] }); },
     onError: (error: Error) => toast.error(error.message),
   });
 
