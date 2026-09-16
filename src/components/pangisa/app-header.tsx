@@ -1,4 +1,4 @@
-import { useClerk } from "@clerk/tanstack-react-start";
+import { supabase } from "@/integrations/supabase/client";
 import { Link, useRouter } from "@tanstack/react-router";
 import { ChevronLeft, Menu } from "lucide-react";
 import { useState } from "react";
@@ -38,13 +38,12 @@ export function AppHeader({ title, back }: { title?: string; back?: boolean }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const { data: user } = useAuthUser();
-  const { signOut: clerkSignOut } = useClerk();
   const queryClient = useQueryClient();
 
   async function signOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
-    await clerkSignOut();
+    await supabase.auth.signOut();
     setOpen(false);
     router.navigate({ to: "/auth", replace: true });
   }
