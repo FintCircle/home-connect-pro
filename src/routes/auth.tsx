@@ -43,8 +43,29 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) void router.navigate({ to: redirectUrl, replace: true });
-  }, [user, redirectUrl, router]);
+    if (!user) return;
+    let cancelled = false;
+    async function attributeReferral() {
+      if (search.ref) {
+        const { data: referrer } = await supabase
+          .from("profiles")
+          .select("id")
+          .ilike("referral_code", search.ref)
+          .neq("id", user.id)
+          .maybeSingle();
+        if (referrer) {
+          await supabase
+            .from("profiles")
+            .update({ referred_by: referrer.id })
+            .eq("id", user.id)
+            .is("referred_by", null);
+        }
+      }
+      if (!cancelled) void router.navigate({ to: redirectUrl, replace: true });
+    }
+    void attributeReferral();
+    return () => { cancelled = true; };
+  }, [search.ref, user, redirectUrl, router]);
 
   async function signInWithGoogle() {
     setLoading(true);
@@ -52,7 +73,7 @@ function AuthPage() {
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(redirectUrl)}`,
+        redirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(redirectUrl)}${search.ref ? `&ref=${encodeURIComponent(search.ref)}` : ""}`,
       },
     });
     if (authError) {
