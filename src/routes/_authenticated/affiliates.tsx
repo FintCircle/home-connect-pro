@@ -45,27 +45,16 @@ function Affiliates() {
     queryKey: ["earnings", user?.id],
     enabled: Boolean(user?.id),
     queryFn: async () => {
-      const [{ data: rows }, { data: payouts }] = await Promise.all([
+      const [{ data: rows }, { data: payouts }, { count: referredCount }] = await Promise.all([
         supabase.from("referral_earnings").select("amount_ugx, created_at"),
         supabase.from("withdrawals").select("amount_ugx, status, created_at"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("referred_by", user!.id),
       ]);
       const earned = (rows ?? []).reduce((sum, row) => sum + Number(row.amount_ugx), 0);
       const claimed = (payouts ?? [])
         .filter((row) => row.status !== "rejected")
         .reduce((sum, row) => sum + Number(row.amount_ugx), 0);
-      return { earned, available: earned - claimed, count: rows?.length ?? 0, payouts: payouts ?? [] };
-    },
-  });
-
-  const invited = useQuery({
-    queryKey: ["invited", user?.id],
-    enabled: Boolean(user?.id),
-    queryFn: async () => {
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("referred_by", user!.id);
-      return count ?? 0;
+      return { earned, available: Math.max(0, earned - claimed), count: referredCount ?? 0, payouts: payouts ?? [] };
     },
   });
 
@@ -116,7 +105,7 @@ function Affiliates() {
         </section>
 
         <section className="grid grid-cols-3 gap-2">
-          <Stat label="People joined" value={String(invited.data ?? 0)} />
+          <Stat label="People joined" value={String(earnings.data?.count ?? 0)} />
           <Stat label="Earned" value={formatUgx(earnings.data?.earned ?? 0)} />
           <Stat label="Available" value={formatUgx(earnings.data?.available ?? 0)} />
         </section>

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { z } from "zod";
 import { ArrowRight, Home, Plus, BarChart3 } from "lucide-react";
 
 import heroImage from "@/assets/hero-kampala.jpg";
@@ -6,6 +7,7 @@ import { AppHeader } from "@/components/pangisa/app-header";
 import { BottomNav } from "@/components/pangisa/bottom-nav";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search) => z.object({ ref: z.string().optional() }).parse(search),
   head: () => ({
     meta: [
       { title: "Pangisa — Find your next home in Uganda" },
@@ -50,6 +52,9 @@ const actions = [
 ] as const;
 
 function Index() {
+  const { ref } = Route.useSearch();
+  const signupLink = ref ? `/auth?mode=signup&ref=${encodeURIComponent(ref)}&redirect=/` : "/auth?mode=signup";
+
   return (
     <div className="min-h-screen pb-20">
       <AppHeader />
@@ -74,6 +79,14 @@ function Index() {
             </p>
           </div>
         </section>
+
+        {ref ? (
+          <section className="mx-4 mb-1 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+            <p className="text-sm font-semibold">You were invited to Pangisa</p>
+            <p className="mt-1 text-xs text-muted-foreground">Create an account through this link so your referrer gets credit.</p>
+            <Link to={signupLink} className="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Create account</Link>
+          </section>
+        ) : null}
 
         <section className="space-y-3 p-4">
           {actions.map(({ to, title, body, icon: Icon, tone }) => (
