@@ -26,7 +26,7 @@ export const Route = createFileRoute("/browse/")({
 });
 
 function BrowseRegions() {
-  const { data: regions, isLoading } = useRegions();
+  const { data: regions, isLoading, isError } = useRegions();
   const { data: counts } = useLiveCounts();
 
   return (
@@ -39,9 +39,14 @@ function BrowseRegions() {
         </p>
 
         <div className="mt-4 space-y-3">
-          {isLoading
-            ? [1, 2, 3, 4].map((n) => <Skeleton key={n} className="h-24 w-full rounded-xl" />)
-            : regions?.map((region) => (
+          {isLoading ? (
+            [1, 2, 3, 4].map((n) => <Skeleton key={n} className="h-24 w-full rounded-xl" />)
+          ) : isError ? (
+            <div className="surface-card p-5 text-sm text-muted-foreground">
+              We couldn&apos;t load regions right now. Please refresh and try again.
+            </div>
+          ) : regions?.length ? (
+            regions.map((region) => (
                 <Link
                   key={region.id}
                   to="/browse/$regionSlug"
@@ -63,7 +68,12 @@ function BrowseRegions() {
                     {counts?.byRegion[region.id] ?? 0} rentals live
                   </p>
                 </Link>
-              ))}
+              ))
+          ) : (
+            <div className="surface-card p-5 text-sm text-muted-foreground">
+              No regions are available yet.
+            </div>
+          )}
         </div>
       </main>
       <BottomNav />
