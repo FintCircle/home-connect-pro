@@ -83,54 +83,60 @@ export function AppHeader({ title, back }: { title?: string; back?: boolean }) {
               <Menu className="size-5" />
             </button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[85%] max-w-xs p-0">
-            <div className="border-b border-border p-5">
+          <SheetContent side="right" className="flex w-[85%] max-w-sm flex-col bg-background p-0">
+            <div className="border-b border-border px-6 py-7">
               <Logo />
             </div>
-            <nav className="flex flex-col p-3">
-              {menu.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-muted"
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <div className="my-2 border-t border-border pt-2">
-                <p className="px-3 pb-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  More about Pangisa
-                </p>
-                {publicInformation.map((item) => (
+            <nav aria-label="Main navigation" className="px-6 py-7">
+              <div className="flex flex-col gap-1">
+                {menu.map((item) => (
                   <Link
-                    key={item.page}
-                    to="/info/$page"
-                    params={{ page: item.page }}
+                    key={item.to}
+                    to={item.to}
                     onClick={() => setOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                    className="rounded-xl px-1 py-3 text-[1.05rem] font-medium tracking-[-0.01em] transition-colors hover:bg-muted hover:text-primary"
                   >
                     {item.label}
                   </Link>
                 ))}
               </div>
+              <div className="mt-7 border-t border-border pt-5">
+                <p className="px-1 pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  More about Pangisa
+                </p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  {publicInformation.map((item) => (
+                    <Link
+                      key={item.page}
+                      to="/info/$page"
+                      params={{ page: item.page }}
+                      onClick={() => setOpen(false)}
+                      className="rounded-lg px-1 py-2 text-sm leading-5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </nav>
-            <div className="p-4">
-              {user ? (
-                <Button variant="outline" className="w-full" onClick={signOut}>
-                  Sign out
-                </Button>
-              ) : (
-                <Button asChild className="w-full">
-                  <Link to="/auth" onClick={() => setOpen(false)}>
-                    Sign in or create account
-                  </Link>
-                </Button>
-              )}
+            <div className="mt-auto border-t border-border px-6 py-5">
+              <div className="rounded-2xl border border-border bg-card p-1 shadow-sm">
+                {user ? (
+                  <Button variant="outline" className="w-full rounded-xl" onClick={signOut}>
+                    Sign out
+                  </Button>
+                ) : (
+                  <Button asChild className="w-full rounded-xl">
+                    <Link to="/auth" onClick={() => setOpen(false)}>
+                      Sign in or create account
+                    </Link>
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="mt-auto bg-primary-soft p-5 text-sm text-primary">
-              <p className="font-display font-semibold">Uganda</p>
-              <p className="text-xs opacity-80">Better rentals. Happier homes.</p>
+            <div className="bg-primary-soft px-6 py-5 text-primary">
+              <p className="font-display text-lg font-semibold">Uganda</p>
+              <p className="text-sm opacity-80">Better rentals. Happier homes.</p>
             </div>
           </SheetContent>
         </Sheet>
