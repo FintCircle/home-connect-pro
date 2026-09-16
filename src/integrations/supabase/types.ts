@@ -498,26 +498,35 @@ export type Database = {
       }
       withdrawals: {
         Row: {
+          admin_note: string | null
           amount_ugx: number
           created_at: string
           id: string
           payout_phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["withdrawal_status"]
           user_id: string
         }
         Insert: {
+          admin_note?: string | null
           amount_ugx: number
           created_at?: string
           id?: string
           payout_phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
           user_id: string
         }
         Update: {
+          admin_note?: string | null
           amount_ugx?: number
           created_at?: string
           id?: string
           payout_phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
           user_id?: string
         }
@@ -528,24 +537,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      attach_referral_by_code: {
-        Args: { p_code: string }
-        Returns: boolean
-      }
-      get_my_referral_count: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      attach_referral_by_code: { Args: { p_code: string }; Returns: boolean }
+      generate_referral_code: { Args: never; Returns: string }
+      get_my_referral_count: { Args: never; Returns: number }
       get_referral_leaders: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
-          referrer_id: string
-          full_name: string | null
-          referral_code: string | null
+          full_name: string
           joined_count: number
+          referral_code: string
+          referrer_id: string
         }[]
       }
-      generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
