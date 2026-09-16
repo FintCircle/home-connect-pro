@@ -132,27 +132,34 @@ function ListProperty() {
         })
         .select("id")
         .single();
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(`Listing could not be saved: ${error.message}`);
 
-      for (const [index, file] of files.entries()) {
-        const path = await uploadPropertyPhoto(user.id, file);
-        await supabase
-          .from("property_images")
-          .insert({ property_id: property.id, url: path, sort_order: index });
+      try {
+        for (const [index, file] of files.entries()) {
+          const path = await uploadPropertyPhoto(user.id, file);
+          const { error: imageError } = await supabase
+            .from("property_images")
+            .insert({ property_id: property.id, url: path, sort_order: index });
+          if (imageError) throw new Error(`Photo ${index + 1} could not be saved: ${imageError.message}`);
+        }
+
+        if (pin || form.address_exact || form.directions_note) {
+          const { error: locationError } = await supabase.from("property_locations").upsert({
+            property_id: property.id,
+            latitude: pin?.lat ?? null,
+            longitude: pin?.lng ?? null,
+            address_exact: form.address_exact || null,
+            directions_note: form.directions_note || null,
+          });
+          if (locationError) throw new Error(`Location could not be saved: ${locationError.message}`);
+        }
+
+        await publishFn({ data: { propertyId: property.id } });
+        return property.id;
+      } catch (error) {
+        await supabase.from("properties").delete().eq("id", property.id).eq("landlord_id", user.id);
+        throw error;
       }
-
-      if (pin || form.address_exact || form.directions_note) {
-        await supabase.from("property_locations").insert({
-          property_id: property.id,
-          latitude: pin?.lat ?? null,
-          longitude: pin?.lng ?? null,
-          address_exact: form.address_exact || null,
-          directions_note: form.directions_note || null,
-        });
-      }
-
-      await publishFn({ data: { propertyId: property.id } });
-      return property.id;
     },
     onSuccess: (id) => {
       toast.success(`Your listing is live. Listing fee ${formatUgx(fee.total)}.`);

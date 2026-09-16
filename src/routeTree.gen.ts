@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PublicInfoRouteImport } from './routes/public-info'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authenticated/affiliates'
@@ -35,6 +36,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicInfoRoute = PublicInfoRouteImport.update({
+  id: '/public-info',
+  path: '/public-info',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
@@ -93,6 +99,7 @@ const BrowseRegionSlugCitySlugRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/public-info': typeof PublicInfoRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/affiliates': typeof AuthenticatedAffiliatesRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/public-info': typeof PublicInfoRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/affiliates': typeof AuthenticatedAffiliatesRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/public-info': typeof PublicInfoRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/public-info'
     | '/account'
     | '/admin'
     | '/affiliates'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/public-info'
     | '/account'
     | '/admin'
     | '/affiliates'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/public-info'
     | '/_authenticated/account'
     | '/_authenticated/admin'
     | '/_authenticated/affiliates'
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PublicInfoRoute: typeof PublicInfoRoute
   BrowseRegionSlugRoute: typeof BrowseRegionSlugRouteWithChildren
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
   RentalsAreaSlugRoute: typeof RentalsAreaSlugRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/public-info': {
+      id: '/public-info'
+      path: '/public-info'
+      fullPath: '/public-info'
+      preLoaderRoute: typeof PublicInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/account': {
@@ -320,6 +340,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  PublicInfoRoute: PublicInfoRoute,
   BrowseRegionSlugRoute: BrowseRegionSlugRouteWithChildren,
   PropertyPropertyIdRoute: PropertyPropertyIdRoute,
   RentalsAreaSlugRoute: RentalsAreaSlugRoute,

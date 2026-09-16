@@ -34,6 +34,13 @@ const menu = [
   { to: "/account", label: "Account" },
 ] as const;
 
+const publicInformation = [
+  { page: "about", label: "About Pangisa" },
+  { page: "terms", label: "Terms of Service" },
+  { page: "privacy", label: "Privacy Policy" },
+  { page: "disclaimer", label: "Disclaimer" },
+] as const;
+
 export function AppHeader({ title, back }: { title?: string; back?: boolean }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -95,6 +102,22 @@ export function AppHeader({ title, back }: { title?: string; back?: boolean }) {
                   {item.label}
                 </Link>
               ))}
+              <div className="my-2 border-t border-border pt-2">
+                <p className="px-3 pb-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  More about Pangisa
+                </p>
+                {publicInformation.map((item) => (
+                  <Link
+                    key={item.page}
+                    to="/info/$page"
+                    params={{ page: item.page }}
+                    onClick={() => setOpen(false)}
+                    className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             </nav>
             <div className="p-4">
               {user ? (
