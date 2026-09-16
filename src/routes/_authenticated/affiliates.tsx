@@ -54,10 +54,20 @@ function Affiliates() {
       if (payoutsError) throw payoutsError;
       if (referralError) throw referralError;
       const earned = (rows ?? []).reduce((sum, row) => sum + Number(row.amount_ugx), 0);
-      const claimed = (payouts ?? [])
-        .filter((row) => row.status !== "rejected")
-        .reduce((sum, row) => sum + Number(row.amount_ugx), 0);
-      return { earned, available: Math.max(0, earned - claimed), count: referredCount ?? 0, payouts: payouts ?? [] };
+      const total = (status: string) =>
+        (payouts ?? [])
+          .filter((row) => row.status === status)
+          .reduce((sum, row) => sum + Number(row.amount_ugx), 0);
+      const pending = total("requested");
+      const paid = total("paid");
+      return {
+        earned,
+        pending,
+        paid,
+        available: Math.max(0, earned - pending - paid),
+        count: referredCount ?? 0,
+        payouts: payouts ?? [],
+      };
     },
   });
 
