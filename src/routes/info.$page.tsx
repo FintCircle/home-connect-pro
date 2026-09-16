@@ -50,7 +50,7 @@ const pages = {
 
 type InfoPage = keyof typeof pages;
 
-export const Route = createFileRoute("/public-info")({
+export const Route = createFileRoute("/info/$page")({
   head: ({ params }) => {
     const page = pages[params.page as InfoPage] ?? pages.about;
     return { meta: [{ title: `${page.title} — Pangisa` }, { name: "description", content: page.description }] };
