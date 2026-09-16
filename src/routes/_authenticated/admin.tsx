@@ -25,6 +25,7 @@ function Admin() {
   const { data: user, isLoading: authLoading } = useAuthUser();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const queryClient = useQueryClient();
+  const reviewFn = useServerFn(reviewWithdrawal);
 
   useEffect(() => {
     if (authLoading) return;
