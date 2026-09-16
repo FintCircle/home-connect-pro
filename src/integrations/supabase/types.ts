@@ -537,7 +537,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      attach_referral_by_code: { Args: { p_code: string }; Returns: boolean }
       generate_referral_code: { Args: never; Returns: string }
+      get_my_referral_count: { Args: never; Returns: number }
       get_referral_leaders: {
         Args: never
         Returns: {
