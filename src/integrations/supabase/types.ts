@@ -498,26 +498,35 @@ export type Database = {
       }
       withdrawals: {
         Row: {
+          admin_note: string | null
           amount_ugx: number
           created_at: string
           id: string
           payout_phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["withdrawal_status"]
           user_id: string
         }
         Insert: {
+          admin_note?: string | null
           amount_ugx: number
           created_at?: string
           id?: string
           payout_phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
           user_id: string
         }
         Update: {
+          admin_note?: string | null
           amount_ugx?: number
           created_at?: string
           id?: string
           payout_phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
           user_id?: string
         }
@@ -529,6 +538,15 @@ export type Database = {
     }
     Functions: {
       generate_referral_code: { Args: never; Returns: string }
+      get_referral_leaders: {
+        Args: never
+        Returns: {
+          full_name: string
+          joined_count: number
+          referral_code: string
+          referrer_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
