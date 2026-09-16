@@ -117,11 +117,18 @@ function Affiliates() {
           </div>
         </section>
 
-        <section className="grid grid-cols-3 gap-2">
+        <section className="grid grid-cols-2 gap-2">
           <Stat label="People joined" value={String(earnings.data?.count ?? 0)} />
           <Stat label="Earned" value={formatUgx(earnings.data?.earned ?? 0)} />
           <Stat label="Available" value={formatUgx(earnings.data?.available ?? 0)} />
+          <Stat label="Waiting for approval" value={formatUgx(earnings.data?.pending ?? 0)} />
+          <Stat label="Paid to you" value={formatUgx(earnings.data?.paid ?? 0)} />
+          <Stat
+            label="Next payout at"
+            value={formatUgx(MIN_WITHDRAWAL_UGX)}
+          />
         </section>
+
 
         <section className="surface-card space-y-3 p-4">
           <h2 className="font-display text-base font-semibold">Withdraw</h2>
