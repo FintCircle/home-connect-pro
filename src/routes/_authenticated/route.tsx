@@ -1,5 +1,5 @@
-import { useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useAuthUser } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -10,8 +10,8 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthenticatedLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
-  if (isLoaded && !isSignedIn) {
+  const { data: user, isLoading } = useAuthUser();
+  if (!isLoading && !user) {
     throw redirect({ to: "/auth" });
   }
   return <Outlet />;
