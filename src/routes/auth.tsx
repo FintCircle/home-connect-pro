@@ -47,18 +47,11 @@ function AuthPage() {
     let cancelled = false;
     async function attributeReferral() {
       if (search.ref) {
-        const { data: referrer } = await supabase
-          .from("profiles")
-          .select("id")
-          .ilike("referral_code", search.ref)
-          .neq("id", user.id)
-          .maybeSingle();
-        if (referrer) {
-          await supabase
-            .from("profiles")
-            .update({ referred_by: referrer.id })
-            .eq("id", user.id)
-            .is("referred_by", null);
+        const { error: referralError } = await supabase.rpc("attach_referral_by_code", {
+          p_code: search.ref,
+        });
+        if (referralError) {
+          console.error("[v0] Referral attribution failed:", referralError.message);
         }
       }
       if (!cancelled) void router.navigate({ to: redirectUrl, replace: true });
