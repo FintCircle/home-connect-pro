@@ -528,6 +528,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      attach_referral_by_code: {
+        Args: { p_code: string }
+        Returns: boolean
+      }
+      get_my_referral_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_referral_leaders: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          referrer_id: string
+          full_name: string | null
+          referral_code: string | null
+          joined_count: number
+        }[]
+      }
       generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
