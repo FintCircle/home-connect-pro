@@ -7,16 +7,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuthUser } from "@/hooks/use-auth";
 import { useQueryClient } from "@tanstack/react-query";
+import logoPin from "@/assets/logo-pin.png";
 
 export function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2">
-      <span className="grid size-9 place-items-center rounded-xl bg-primary-soft text-primary">
-        <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 11.5 12 4l9 7.5" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M5.5 10.5V20h13v-9.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
+      <img src={logoPin} alt="Pangisa" className="size-9 object-contain" />
       <span className="leading-none">
         <span className="block font-display text-lg font-bold text-primary">Pangisa</span>
         <span className="block text-[0.65rem] text-muted-foreground">Rent direct. Live better.</span>
