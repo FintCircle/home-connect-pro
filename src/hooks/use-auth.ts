@@ -49,8 +49,13 @@ export function useProfile() {
       ? {
           ...(profile.data ?? {}),
           id: user.id,
-          full_name: profile.data?.full_name ?? user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-          avatar_url: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+          full_name:
+            profile.data?.full_name ??
+            user.user_metadata?.['full_name'] ??
+            user.user_metadata?.['name'] ??
+            null,
+          avatar_url:
+            user.user_metadata?.['avatar_url'] ?? user.user_metadata?.['picture'] ?? null,
           email: user.email ?? null,
           phone: profile.data?.phone ?? user.phone ?? null,
         }
