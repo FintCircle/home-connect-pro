@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Check, EyeOff, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -19,17 +19,31 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function Admin() {
+  const router = useRouter();
   const { data: user, isLoading: authLoading } = useAuthUser();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!user) return;
-    void supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle().then(({ data }) => setAllowed(Boolean(data)));
-  }, [user]);
+    if (authLoading) return;
+    if (!user) {
+      void router.navigate({ to: "/auth", search: { redirect: "/admin" }, replace: true });
+      return;
+    }
+    void supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => setAllowed(Boolean(data)));
+  }, [authLoading, router, user]);
 
-  if (!authLoading && !user) throw redirect({ to: "/auth" });
-  if (allowed === false) throw redirect({ to: "/dashboard" });
+  useEffect(() => {
+    if (!authLoading && user && allowed === false) {
+      void router.navigate({ to: "/dashboard", replace: true });
+    }
+  }, [allowed, authLoading, router, user]);
 
   const data = useQuery({
     queryKey: ["admin-data"],
@@ -64,7 +78,7 @@ function Admin() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  if (authLoading || allowed === null) return <Skeleton className="m-4 h-32" />;
+  if (authLoading || !user || allowed === null || allowed === false) return <Skeleton className="m-4 h-32" />;
 
   return (
     <div className="min-h-screen pb-20">
