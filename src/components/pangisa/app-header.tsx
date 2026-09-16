@@ -75,7 +75,40 @@ export function AppHeader({ title, back }: { title?: string; back?: boolean }) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
-      <div className="mx-auto flex max-w-lg items-center gap-2 px-4 py-3">
+      <div className="mx-auto hidden h-20 max-w-6xl items-center gap-8 px-8 md:flex">
+        <Logo />
+        <nav aria-label="Main navigation" className="flex flex-1 items-center gap-1">
+          {menu.slice(0, 3).map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              activeOptions={{ exact: item.to === "/" }}
+              activeProps={{ className: "bg-primary/10 text-primary" }}
+              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <Link to="/dashboard" className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+                Dashboard
+              </Link>
+              <Button variant="outline" className="rounded-full" onClick={signOut}>Sign out</Button>
+            </>
+          ) : (
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+          )}
+          <Button asChild className="rounded-full">
+            <Link to="/list-property">List a property</Link>
+          </Button>
+        </div>
+      </div>
+      <div className="mx-auto flex max-w-lg items-center gap-2 px-4 py-3 md:hidden">
         {back ? (
           <button
             type="button"

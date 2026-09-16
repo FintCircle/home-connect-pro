@@ -30,15 +30,17 @@ function BrowseRegions() {
   const { data: counts } = useLiveCounts();
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 md:pb-0">
       <AppHeader title="Pangisa" back />
-      <main className="mx-auto max-w-lg p-4">
-        <h2 className="font-display text-2xl font-bold">Choose a region</h2>
+      <main className="mx-auto max-w-6xl p-4 md:px-8 md:py-10">
+        <div className="max-w-2xl">
+          <h2 className="font-display text-2xl font-bold md:text-4xl">Choose a region</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Select a region to find rentals in its cities and districts.
         </p>
 
-        <div className="mt-4 space-y-3">
+        </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 md:mt-10 md:grid-cols-3">
           {isLoading ? (
             [1, 2, 3, 4].map((n) => <Skeleton key={n} className="h-24 w-full rounded-xl" />)
           ) : isError ? (
