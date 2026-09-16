@@ -49,21 +49,27 @@ function Admin() {
     queryKey: ["admin-data"],
     enabled: allowed === true,
     queryFn: async () => {
-      const [profiles, properties, withdrawals] = await Promise.all([
+      const [profiles, properties, withdrawals, relationships] = await Promise.all([
         supabase.from("profiles").select("id, full_name, phone, referral_code, referred_by, verified, created_at").order("created_at", { ascending: false }),
         supabase.from("properties").select("id, title, status, rent_ugx, landlord_id, created_at, areas(name, cities(name))").order("created_at", { ascending: false }),
         supabase.from("withdrawals").select("id, user_id, amount_ugx, payout_phone, status, admin_note, created_at").order("created_at", { ascending: false }),
+        supabase.from("referral_relationships").select("id, referrer_id, referred_user_id, referral_code, created_at").order("created_at", { ascending: false }),
       ]);
-      const error = profiles.error ?? properties.error ?? withdrawals.error;
+      const error = profiles.error ?? properties.error ?? withdrawals.error ?? relationships.error;
       if (error) throw error;
       const allProfiles = profiles.data ?? [];
+      const referralCounts = new Map<string, number>();
+      for (const relationship of relationships.data ?? []) {
+        referralCounts.set(relationship.referrer_id, (referralCounts.get(relationship.referrer_id) ?? 0) + 1);
+      }
       return {
         profiles: allProfiles,
         properties: properties.data ?? [],
         withdrawals: withdrawals.data ?? [],
         referralSummary: allProfiles
-          .map((profile) => ({ ...profile, referralCount: allProfiles.filter((candidate) => candidate.referred_by === profile.id).length }))
-          .filter((profile) => profile.referralCount > 0),
+          .map((profile) => ({ ...profile, referralCount: referralCounts.get(profile.id) ?? 0 }))
+          .filter((profile) => profile.referralCount > 0)
+          .sort((a, b) => b.referralCount - a.referralCount),
       };
     },
   });
