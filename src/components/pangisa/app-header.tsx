@@ -138,13 +138,13 @@ export function AppHeader({ title, back }: { title?: string; back?: boolean }) {
               <Menu className="size-5" />
             </button>
           </DrawerTrigger>
-          <DrawerContent className="mx-auto max-h-[92vh] max-w-lg overflow-y-auto rounded-t-[2rem] border-border bg-background pb-0">
+          <DrawerContent className="mx-auto max-h-[55vh] max-w-lg overflow-y-auto rounded-t-[2rem] border-border bg-background pb-0">
             <DrawerHeader className="border-b border-border px-6 pb-5 pt-3 text-left">
               <DrawerTitle className="sr-only">Pangisa menu</DrawerTitle>
               <DrawerDescription className="sr-only">Navigate Pangisa</DrawerDescription>
               <Logo />
             </DrawerHeader>
-            <nav aria-label="Main navigation" className="px-5 py-5">
+            <nav aria-label="Main navigation" className="px-5 py-3">
               <div className="grid grid-cols-2 gap-3">
                 {menu.map((item) => {
                   const Icon = item.icon;
@@ -153,10 +153,10 @@ export function AppHeader({ title, back }: { title?: string; back?: boolean }) {
                       key={item.to}
                       to={item.to}
                       onClick={() => setOpen(false)}
-                      className="group flex min-h-24 flex-col justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+                      className="group flex min-h-20 flex-col justify-between rounded-2xl border border-border bg-card p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
                     >
-                      <span className={`grid size-9 place-items-center rounded-xl ${item.tone}`}>
-                        <Icon aria-hidden="true" />
+                      <span className={`grid size-8 place-items-center rounded-xl ${item.tone}`}>
+                        <Icon aria-hidden="true" className="size-4" />
                       </span>
                       <span className="text-sm font-semibold leading-tight text-foreground group-hover:text-primary">
                         {item.label}
