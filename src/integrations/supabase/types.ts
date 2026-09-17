@@ -116,6 +116,116 @@ export type Database = {
           },
         ]
       }
+      location_suggestions: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          parent_location_id: string | null
+          raw_name: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["suggestion_status"]
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          parent_location_id?: string | null
+          raw_name: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["suggestion_status"]
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          parent_location_id?: string | null
+          raw_name?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["suggestion_status"]
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_suggestions_parent_location_id_fkey"
+            columns: ["parent_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      locations: {
+        Row: {
+          created_at: string
+          full_path: string | null
+          id: string
+          is_active: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          parent_id: string | null
+          region_id: string | null
+          slug: string
+          sort_order: number
+          type: Database["public"]["Enums"]["location_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_path?: string | null
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          parent_id?: string | null
+          region_id?: string | null
+          slug: string
+          sort_order?: number
+          type: Database["public"]["Enums"]["location_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_path?: string | null
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          parent_id?: string | null
+          region_id?: string | null
+          slug?: string
+          sort_order?: number
+          type?: Database["public"]["Enums"]["location_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "locations_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_ugx: number
@@ -210,7 +320,7 @@ export type Database = {
       properties: {
         Row: {
           amenities: string[]
-          area_id: string
+          area_id: string | null
           bathrooms: number
           bedrooms: number
           created_at: string
@@ -225,6 +335,7 @@ export type Database = {
           landmark: string | null
           listing_fee_ugx: number | null
           live_at: string | null
+          location_id: string | null
           parking_spaces: number
           power_source: string | null
           property_type: string
@@ -241,7 +352,7 @@ export type Database = {
         }
         Insert: {
           amenities?: string[]
-          area_id: string
+          area_id?: string | null
           bathrooms?: number
           bedrooms?: number
           created_at?: string
@@ -256,6 +367,7 @@ export type Database = {
           landmark?: string | null
           listing_fee_ugx?: number | null
           live_at?: string | null
+          location_id?: string | null
           parking_spaces?: number
           power_source?: string | null
           property_type: string
@@ -272,7 +384,7 @@ export type Database = {
         }
         Update: {
           amenities?: string[]
-          area_id?: string
+          area_id?: string | null
           bathrooms?: number
           bedrooms?: number
           created_at?: string
@@ -287,6 +399,7 @@ export type Database = {
           landmark?: string | null
           listing_fee_ugx?: number | null
           live_at?: string | null
+          location_id?: string | null
           parking_spaces?: number
           power_source?: string | null
           property_type?: string
@@ -307,6 +420,13 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
             referencedColumns: ["id"]
           },
         ]
@@ -556,12 +676,56 @@ export type Database = {
         }
         Returns: boolean
       }
+      location_ancestors: {
+        Args: { _id: string }
+        Returns: {
+          depth: number
+          full_path: string
+          id: string
+          name: string
+          slug: string
+          type: Database["public"]["Enums"]["location_type"]
+        }[]
+      }
+      location_descendants: {
+        Args: { _id: string }
+        Returns: {
+          id: string
+        }[]
+      }
+      locations_compute_path: {
+        Args: { _parent_id: string; _slug: string }
+        Returns: string
+      }
+      locations_refresh_subtree: { Args: { _id: string }; Returns: undefined }
+      search_locations: {
+        Args: { _limit?: number; _term: string }
+        Returns: {
+          full_path: string
+          id: string
+          label: string
+          name: string
+          type: Database["public"]["Enums"]["location_type"]
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user"
+      location_type:
+        | "country"
+        | "region"
+        | "district"
+        | "city"
+        | "municipality"
+        | "town"
+        | "division"
+        | "area"
+        | "neighborhood"
+        | "village"
       payment_kind: "listing" | "access"
       payment_status: "pending" | "paid" | "failed"
       property_status: "draft" | "live" | "taken" | "paused"
+      suggestion_status: "pending" | "approved" | "dismissed"
       withdrawal_status: "requested" | "paid" | "rejected"
     }
     CompositeTypes: {
@@ -691,9 +855,22 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      location_type: [
+        "country",
+        "region",
+        "district",
+        "city",
+        "municipality",
+        "town",
+        "division",
+        "area",
+        "neighborhood",
+        "village",
+      ],
       payment_kind: ["listing", "access"],
       payment_status: ["pending", "paid", "failed"],
       property_status: ["draft", "live", "taken", "paused"],
+      suggestion_status: ["pending", "approved", "dismissed"],
       withdrawal_status: ["requested", "paid", "rejected"],
     },
   },
