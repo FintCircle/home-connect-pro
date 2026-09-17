@@ -708,8 +708,6 @@ export type Database = {
           type: Database["public"]["Enums"]["location_type"]
         }[]
       }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "user"
