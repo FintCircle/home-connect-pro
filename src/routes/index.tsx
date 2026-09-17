@@ -59,7 +59,7 @@ function Index() {
     <div className="min-h-screen pb-20 md:pb-0">
       <AppHeader />
       <main className="mx-auto max-w-6xl px-4 md:px-8">
-        <section className="relative h-64 overflow-hidden md:mt-8 md:h-[30rem] md:rounded-[2rem]">
+        <section className="relative hidden h-64 overflow-hidden md:mt-8 md:block md:h-[30rem] md:rounded-[2rem]">
           <img
             src={heroImage}
             alt="Aerial view of Kampala neighbourhoods under dramatic clouds"
