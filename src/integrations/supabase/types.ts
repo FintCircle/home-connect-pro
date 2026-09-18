@@ -698,6 +698,7 @@ export type Database = {
         Returns: string
       }
       locations_refresh_subtree: { Args: { _id: string }; Returns: undefined }
+      pangisa_slug: { Args: { _t: string }; Returns: string }
       search_locations: {
         Args: { _limit?: number; _term: string }
         Returns: {
