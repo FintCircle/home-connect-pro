@@ -19,6 +19,8 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedListPropertyRouteImport } from './routes/_authenticated/list-property'
 import { Route as BrowseIndexRouteImport } from './routes/browse.index'
 import { Route as BrowseRegionSlugRouteImport } from './routes/browse.$regionSlug'
+import { Route as HomesIndexRouteImport } from './routes/homes.index'
+import { Route as HomesSplatRouteImport } from './routes/homes.$'
 import { Route as InfoPageRouteImport } from './routes/info.$page'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
 import { Route as RentalsAreaSlugRouteImport } from './routes/rentals.$areaSlug'
@@ -74,6 +76,16 @@ const BrowseRegionSlugRoute = BrowseRegionSlugRouteImport.update({
   path: '/browse/$regionSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomesIndexRoute = HomesIndexRouteImport.update({
+  id: '/homes/',
+  path: '/homes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomesSplatRoute = HomesSplatRouteImport.update({
+  id: '/homes/$',
+  path: '/homes/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InfoPageRoute = InfoPageRouteImport.update({
   id: '/info/$page',
   path: '/info/$page',
@@ -105,10 +117,12 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-property': typeof AuthenticatedListPropertyRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/homes/$': typeof HomesSplatRoute
   '/info/$page': typeof InfoPageRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse/': typeof BrowseIndexRoute
+  '/homes/': typeof HomesIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRoutesByTo {
@@ -120,10 +134,12 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-property': typeof AuthenticatedListPropertyRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/homes/$': typeof HomesSplatRoute
   '/info/$page': typeof InfoPageRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse': typeof BrowseIndexRoute
+  '/homes': typeof HomesIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRoutesById {
@@ -137,10 +153,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/list-property': typeof AuthenticatedListPropertyRoute
   '/browse/$regionSlug': typeof BrowseRegionSlugRouteWithChildren
+  '/homes/$': typeof HomesSplatRoute
   '/info/$page': typeof InfoPageRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/rentals/$areaSlug': typeof RentalsAreaSlugRoute
   '/browse/': typeof BrowseIndexRoute
+  '/homes/': typeof HomesIndexRoute
   '/browse/$regionSlug/$citySlug': typeof BrowseRegionSlugCitySlugRoute
 }
 export interface FileRouteTypes {
@@ -154,10 +172,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/list-property'
     | '/browse/$regionSlug'
+    | '/homes/$'
     | '/info/$page'
     | '/property/$propertyId'
     | '/rentals/$areaSlug'
     | '/browse/'
+    | '/homes/'
     | '/browse/$regionSlug/$citySlug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -169,10 +189,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/list-property'
     | '/browse/$regionSlug'
+    | '/homes/$'
     | '/info/$page'
     | '/property/$propertyId'
     | '/rentals/$areaSlug'
     | '/browse'
+    | '/homes'
     | '/browse/$regionSlug/$citySlug'
   id:
     | '__root__'
@@ -185,10 +207,12 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/list-property'
     | '/browse/$regionSlug'
+    | '/homes/$'
     | '/info/$page'
     | '/property/$propertyId'
     | '/rentals/$areaSlug'
     | '/browse/'
+    | '/homes/'
     | '/browse/$regionSlug/$citySlug'
   fileRoutesById: FileRoutesById
 }
@@ -197,10 +221,12 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BrowseRegionSlugRoute: typeof BrowseRegionSlugRouteWithChildren
+  HomesSplatRoute: typeof HomesSplatRoute
   InfoPageRoute: typeof InfoPageRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
   RentalsAreaSlugRoute: typeof RentalsAreaSlugRoute
   BrowseIndexRoute: typeof BrowseIndexRoute
+  HomesIndexRoute: typeof HomesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -275,6 +301,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrowseRegionSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/homes/': {
+      id: '/homes/'
+      path: '/homes'
+      fullPath: '/homes/'
+      preLoaderRoute: typeof HomesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/homes/$': {
+      id: '/homes/$'
+      path: '/homes/$'
+      fullPath: '/homes/$'
+      preLoaderRoute: typeof HomesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/info/$page': {
       id: '/info/$page'
       path: '/info/$page'
@@ -341,10 +381,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BrowseRegionSlugRoute: BrowseRegionSlugRouteWithChildren,
+  HomesSplatRoute: HomesSplatRoute,
   InfoPageRoute: InfoPageRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRoute,
   RentalsAreaSlugRoute: RentalsAreaSlugRoute,
   BrowseIndexRoute: BrowseIndexRoute,
+  HomesIndexRoute: HomesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
