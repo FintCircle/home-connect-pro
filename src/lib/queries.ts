@@ -115,7 +115,7 @@ export function useProperty(propertyId: string) {
       const { data, error } = await supabase
         .from("properties")
         .select(
-          "*, areas(name, slug, cities(name, slug, regions(name, slug))), property_images(url, sort_order)",
+          "*, locations(name, full_path), areas(name, slug, cities(name, slug, regions(name, slug))), property_images(url, sort_order)",
         )
         .eq("id", propertyId)
         .maybeSingle();

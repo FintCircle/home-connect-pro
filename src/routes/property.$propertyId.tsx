@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuthUser } from "@/hooks/use-auth";
+import { pathLabel } from "@/lib/locations";
 import { accessFee, formatUgx } from "@/lib/fees";
 import { releaseUnlock, submitSilentReview, unlockProperty } from "@/lib/pangisa.functions";
 import { usePhotoUrls } from "@/lib/photos";
@@ -120,13 +121,15 @@ function PropertyDetail() {
 
   const fee = accessFee(property.rent_ugx);
   const video = youtubeEmbedUrl(property.video_url);
-  const place = [
-    property.areas?.name,
-    property.areas?.cities?.name,
-    property.areas?.cities?.regions?.name,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const place = property.locations
+    ? pathLabel(property.locations.full_path, 4) || property.locations.name
+    : [
+        property.areas?.name,
+        property.areas?.cities?.name,
+        property.areas?.cities?.regions?.name,
+      ]
+        .filter(Boolean)
+        .join(", ");
 
   const facts = [
     { icon: BedDouble, label: `${property.bedrooms} bedrooms` },
@@ -245,7 +248,7 @@ function PropertyDetail() {
             <p className="mb-2 text-xs text-muted-foreground">
               {unlock || isOwner
                 ? location?.address_exact || property.landmark || place
-                : `Around ${property.areas?.name}. Exact address is shared after you unlock.`}
+                : `Around ${property.locations?.name ?? property.areas?.name}. Exact address is shared after you unlock.`}
             </p>
             <LocationMap
               latitude={location?.latitude ?? null}
