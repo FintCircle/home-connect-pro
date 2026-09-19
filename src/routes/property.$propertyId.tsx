@@ -111,7 +111,7 @@ function PropertyDetail() {
           This rental is no longer available.
           <div className="mt-4">
             <Button asChild>
-              <Link to="/browse">Find another home</Link>
+              <Link to="/homes">Find another home</Link>
             </Button>
           </div>
         </div>

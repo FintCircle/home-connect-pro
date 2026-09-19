@@ -5,6 +5,7 @@ import { ArrowRight, Home, Plus, BarChart3 } from "lucide-react";
 import heroImage from "@/assets/hero-kampala.jpg";
 import { AppHeader } from "@/components/pangisa/app-header";
 import { BottomNav } from "@/components/pangisa/bottom-nav";
+import { LocationSearch } from "@/components/pangisa/location-search";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search) => z.object({ ref: z.string().optional() }).parse(search),
@@ -29,9 +30,9 @@ export const Route = createFileRoute("/")({
 
 const actions = [
   {
-    to: "/browse",
+    to: "/homes",
     title: "Find a Home",
-    body: "Browse by region, city and district.",
+    body: "Search any area, town or district.",
     icon: Home,
     tone: "bg-primary-soft text-primary",
   },
@@ -78,6 +79,10 @@ function Index() {
               Real rentals. Real landlords. Across Uganda.
             </p>
           </div>
+        </section>
+
+        <section className="p-4 md:px-8 md:pt-8">
+          <LocationSearch placeholder="Where do you want to live? e.g. Ntinda" />
         </section>
 
         {ref ? (
