@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { BedDouble, Bath, Car, ShieldCheck, MapPin } from "lucide-react";
 
 import { formatUgx } from "@/lib/fees";
+import { pathLabel } from "@/lib/locations";
 import { usePhotoUrls } from "@/lib/photos";
 
 export type PropertyCardData = {
@@ -14,6 +15,7 @@ export type PropertyCardData = {
   landlord_verified: boolean;
   has_units: boolean;
   units_available: number;
+  locations?: { name: string; full_path: string | null } | null;
   areas?: { name: string; cities?: { name: string } | null } | null;
   property_images?: { url: string }[];
 };
@@ -22,7 +24,9 @@ export function PropertyCard({ property }: { property: PropertyCardData }) {
   const firstPhoto = property.property_images?.[0]?.url;
   const { data: urls } = usePhotoUrls(firstPhoto ? [firstPhoto] : []);
   const photo = urls?.[0];
-  const place = [property.areas?.name, property.areas?.cities?.name].filter(Boolean).join(", ");
+  const place = property.locations
+    ? pathLabel(property.locations.full_path, 3) || property.locations.name
+    : [property.areas?.name, property.areas?.cities?.name].filter(Boolean).join(", ");
 
   return (
     <Link

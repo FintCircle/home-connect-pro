@@ -43,7 +43,7 @@ export function Logo() {
 
 const menu = [
   { to: "/", label: "Home", icon: Home, tone: "bg-emerald-50 text-emerald-700" },
-  { to: "/browse", label: "Find a home", icon: Search, tone: "bg-sky-50 text-sky-700" },
+  { to: "/homes", label: "Find a home", icon: Search, tone: "bg-sky-50 text-sky-700" },
   { to: "/list-property", label: "List your property", icon: Building2, tone: "bg-amber-50 text-amber-700" },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, tone: "bg-violet-50 text-violet-700" },
   { to: "/affiliates", label: "Funa Sente", icon: Gift, tone: "bg-rose-50 text-rose-700" },

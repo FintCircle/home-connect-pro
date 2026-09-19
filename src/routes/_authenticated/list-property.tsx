@@ -26,7 +26,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatUgx, listingFee } from "@/lib/fees";
 import { publishProperty } from "@/lib/pangisa.functions";
 import { uploadPropertyPhoto } from "@/lib/photos";
-import { useCity, useRegions } from "@/lib/queries";
+import { LocationPicker, useLocationTrail } from "@/components/pangisa/location-picker";
+import { childrenOf, useLocationTree } from "@/lib/locations";
+import { suggestLocation } from "@/lib/locations.functions";
 import {
   AMENITIES,
   FENCE_OPTIONS,
@@ -59,11 +61,19 @@ function ListProperty() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: user } = useAuthUser();
-  const { data: regions } = useRegions();
-  const [regionSlug, setRegionSlug] = useState("");
-  const [citySlug, setCitySlug] = useState("");
-  const [areaId, setAreaId] = useState("");
-  const { data: city } = useCity(citySlug);
+  const { data: locationRows } = useLocationTree();
+  const [locationId, setLocationId] = useState<string | null>(null);
+  const trail = useLocationTrail(locationId);
+  const [missingArea, setMissingArea] = useState("");
+  const suggestFn = useServerFn(suggestLocation);
+  const suggest = useMutation({
+    mutationFn: () => suggestFn({ data: { name: missingArea, parentId: locationId } }),
+    onSuccess: () => {
+      setMissingArea("");
+      toast.success("Thanks — we sent your area to the Pangisa team to add.");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const [form, setForm] = useState({
     title: "",
@@ -101,14 +111,14 @@ function ListProperty() {
   const save = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("Please sign in again");
-      if (!areaId) throw new Error("Choose the area where the property is");
+      if (!locationId) throw new Error("Choose the place where the property is");
       if (rent <= 0) throw new Error("Enter the monthly rent");
 
       const { data: property, error } = await supabase
         .from("properties")
         .insert({
           landlord_id: user.id,
-          area_id: areaId,
+          location_id: locationId,
           title: form.title,
           description: form.description || null,
           property_type: form.property_type,
@@ -209,8 +219,9 @@ function ListProperty() {
     });
   }
 
-  const regionOptions = regions ?? [];
-  const cityOptions = regionOptions.find((region) => region.slug === regionSlug)?.cities ?? [];
+  const hasDeeperPlaces = locationId
+    ? childrenOf(locationRows, locationId).some((row) => row.is_active)
+    : false;
 
   return (
     <div className="min-h-screen pb-24">
@@ -218,64 +229,36 @@ function ListProperty() {
       <main className="mx-auto max-w-lg space-y-6 p-4">
         <section className="space-y-3">
           <h2 className="font-display text-lg font-bold">Where is it?</h2>
-          <div className="grid gap-3">
-            <Select
-              value={regionSlug}
-              onValueChange={(value) => {
-                setRegionSlug(value);
-                setCitySlug("");
-                setAreaId("");
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Region" />
-              </SelectTrigger>
-              <SelectContent>
-                {regionOptions.map((region) => (
-                  <SelectItem key={region.id} value={region.slug}>
-                    {region.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={citySlug}
-              onValueChange={(value) => {
-                setCitySlug(value);
-                setAreaId("");
-              }}
-              disabled={!regionSlug}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="City or district" />
-              </SelectTrigger>
-              <SelectContent>
-                {cityOptions
-                  .slice()
-                  .sort((a, b) => a.sort_order - b.sort_order)
-                  .map((option) => (
-                    <SelectItem key={option.id} value={option.slug}>
-                      {option.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-            <Select value={areaId} onValueChange={setAreaId} disabled={!citySlug}>
-              <SelectTrigger>
-                <SelectValue placeholder="Area / neighbourhood" />
-              </SelectTrigger>
-              <SelectContent>
-                {(city?.areas ?? [])
-                  .slice()
-                  .sort((a, b) => a.sort_order - b.sort_order)
-                  .map((area) => (
-                    <SelectItem key={area.id} value={area.id}>
-                      {area.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <LocationPicker value={locationId} onChange={setLocationId} />
+          {trail.length ? (
+            <p className="text-xs text-muted-foreground">
+              {trail.map((step) => step.name).join(" › ")}
+            </p>
+          ) : null}
+          {locationId && !hasDeeperPlaces ? (
+            <div className="surface-card space-y-2 p-3.5">
+              <p className="text-xs font-semibold">Can&apos;t find your area?</p>
+              <p className="text-xs text-muted-foreground">
+                Type it and we&apos;ll review it. Your listing still uses the place you picked
+                above.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="e.g. Kyaliwajjala"
+                  value={missingArea}
+                  onChange={(event) => setMissingArea(event.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={missingArea.trim().length < 2 || suggest.isPending}
+                  onClick={() => suggest.mutate()}
+                >
+                  Send
+                </Button>
+              </div>
+            </div>
+          ) : null}
 
           <div className="surface-card space-y-3 p-4">
             <p className="text-xs text-muted-foreground">
