@@ -2,41 +2,46 @@ import { useEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
-    google?: any;
-    initPangisaMapPicker?: () => void;
+    L?: any;
   }
 }
 
 export type LatLng = { lat: number; lng: number };
 
 const KAMPALA: LatLng = { lat: 0.3476, lng: 32.5825 };
+const LEAFLET = "https://unpkg.com/leaflet@1.9.4/dist";
 
-let scriptPromise: Promise<void> | null = null;
+let loader: Promise<void> | null = null;
 
-function loadMapsScript(): Promise<void> {
-  if (typeof window !== "undefined" && window.google?.maps) return Promise.resolve();
-  if (scriptPromise) return scriptPromise;
-  scriptPromise = new Promise((resolve, reject) => {
-    window.initPangisaMapPicker = () => resolve();
+function loadLeaflet(): Promise<void> {
+  if (window.L) return Promise.resolve();
+  if (loader) return loader;
+  loader = new Promise((resolve, reject) => {
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = `${LEAFLET}/leaflet.css`;
+    document.head.appendChild(css);
     const script = document.createElement("script");
-    const key = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"];
-    const channel = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID"];
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&callback=initPangisaMapPicker&channel=${channel}`;
+    script.src = `${LEAFLET}/leaflet.js`;
     script.async = true;
-    script.onerror = () => reject(new Error("map script failed to load"));
+    script.onload = () => resolve();
+    script.onerror = () => {
+      loader = null;
+      reject(new Error("map failed to load"));
+    };
     document.head.appendChild(script);
   });
-  return scriptPromise;
+  return loader;
 }
 
 /**
- * Interactive Google Map for dropping the exact property pin.
- * Tap anywhere on the map or drag the marker to set the exact spot.
+ * OpenStreetMap picker. Tap the map or drag the pin to mark the exact spot —
+ * the fallback when the automatic location is missing or off.
  */
 export function MapPicker({
   value,
   onChange,
-  className = "h-56 w-full",
+  className = "h-64 w-full",
 }: {
   value: LatLng | null;
   onChange: (point: LatLng) => void;
@@ -45,61 +50,63 @@ export function MapPicker({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
   const [failed, setFailed] = useState(false);
+
+  function placeMarker(point: LatLng) {
+    const L = window.L;
+    const map = mapRef.current;
+    if (!L || !map) return;
+    if (!markerRef.current) {
+      const icon = L.icon({
+        iconUrl: `${LEAFLET}/images/marker-icon.png`,
+        iconRetinaUrl: `${LEAFLET}/images/marker-icon-2x.png`,
+        shadowUrl: `${LEAFLET}/images/marker-shadow.png`,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+      });
+      markerRef.current = L.marker([point.lat, point.lng], { draggable: true, icon }).addTo(map);
+      markerRef.current.on("dragend", () => {
+        const p = markerRef.current.getLatLng();
+        onChangeRef.current({ lat: p.lat, lng: p.lng });
+      });
+    } else {
+      markerRef.current.setLatLng([point.lat, point.lng]);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
-    loadMapsScript()
+    loadLeaflet()
       .then(() => {
-        if (cancelled || !containerRef.current || mapRef.current || !window.google?.maps) return;
+        if (cancelled || !containerRef.current || mapRef.current) return;
+        const L = window.L;
         const center = value ?? KAMPALA;
-        const map = new window.google.maps.Map(containerRef.current, {
-          center,
-          zoom: value ? 17 : 12,
-          clickableIcons: false,
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false,
-        });
+        const map = L.map(containerRef.current).setView([center.lat, center.lng], value ? 17 : 12);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+        map.on("click", (event: any) => onChangeRef.current({ lat: event.latlng.lat, lng: event.latlng.lng }));
         mapRef.current = map;
-        map.addListener("click", (event: any) => {
-          const lat = event.latLng.lat();
-          const lng = event.latLng.lng();
-          onChange({ lat, lng });
-        });
         if (value) placeMarker(value);
       })
       .catch(() => setFailed(true));
     return () => {
       cancelled = true;
+      mapRef.current?.remove();
+      mapRef.current = null;
+      markerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function placeMarker(point: LatLng) {
-    const map = mapRef.current;
-    if (!map || !window.google?.maps) return;
-    if (!markerRef.current) {
-      markerRef.current = new window.google.maps.Marker({
-        map,
-        draggable: true,
-        position: point,
-      });
-      markerRef.current.addListener("dragend", () => {
-        const position = markerRef.current.getPosition();
-        onChange({ lat: position.lat(), lng: position.lng() });
-      });
-    } else {
-      markerRef.current.setPosition(point);
-    }
-  }
-
-  // Keep the marker and view in sync when the pin moves (e.g. "use my location").
   useEffect(() => {
     if (!value || !mapRef.current) return;
     placeMarker(value);
-    mapRef.current.panTo(value);
-    if ((mapRef.current.getZoom() ?? 0) < 15) mapRef.current.setZoom(17);
+    const zoom = Math.max(mapRef.current.getZoom() ?? 0, 17);
+    mapRef.current.setView([value.lat, value.lng], zoom);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value?.lat, value?.lng]);
 
@@ -111,5 +118,12 @@ export function MapPicker({
     );
   }
 
-  return <div ref={containerRef} className={`rounded-xl border border-border ${className}`} />;
+  return (
+    <div className="space-y-1.5">
+      <div ref={containerRef} className={`relative z-0 rounded-xl border border-border ${className}`} />
+      <p className="text-xs text-muted-foreground">
+        Location off or the pin is wrong? Tap the map to mark the spot, or drag the pin.
+      </p>
+    </div>
+  );
 }
