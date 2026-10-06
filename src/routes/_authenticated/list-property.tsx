@@ -108,17 +108,68 @@ function ListProperty() {
 
   const publishFn = useServerFn(publishProperty);
 
+  // Read the place from the map pin when the owner hasn't picked one by hand.
+  const [pinPlaceTried, setPinPlaceTried] = useState<string | null>(null);
+  async function placeFromPin(point: { lat: number; lng: number }): Promise<string | null> {
+    const rows = locationRows ?? [];
+    if (!rows.length) return null;
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat=${point.lat}&lon=${point.lng}`,
+        { headers: { Accept: "application/json" } },
+      );
+      if (!res.ok) return null;
+      const json = (await res.json()) as { address?: Record<string, string> };
+      const address = json.address ?? {};
+      const keys = ["neighbourhood", "suburb", "quarter", "hamlet", "village", "city_district", "town", "municipality", "city", "county", "state_district"];
+      const norm = (s: string) => s.toLowerCase().replace(/\b(division|municipality|town council|city|district|county)\b/g, "").replace(/[^a-z0-9]+/g, "");
+      for (const key of keys) {
+        const name = address[key];
+        if (!name) continue;
+        const target = norm(name);
+        if (!target) continue;
+        const matches = rows.filter((row) => row.is_active && norm(row.name) === target);
+        if (matches.length) {
+          // Prefer the most specific (deepest) match.
+          matches.sort((a, b) => (b.full_path?.split("/").length ?? 0) - (a.full_path?.split("/").length ?? 0));
+          return matches[0].id;
+        }
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  }
+
+  useEffect(() => {
+    if (!pin || locationId || !locationRows?.length) return;
+    const key = `${pin.lat.toFixed(4)},${pin.lng.toFixed(4)}`;
+    if (pinPlaceTried === key) return;
+    setPinPlaceTried(key);
+    void placeFromPin(pin).then((id) => {
+      if (id) {
+        setLocationId((current) => current ?? id);
+        toast.success("Place filled in from your map pin — change it if it's wrong.");
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin?.lat, pin?.lng, locationRows?.length, locationId]);
+
   const save = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("Please sign in again");
-      if (!locationId) throw new Error("Choose the place where the property is");
+      let placeId = locationId;
+      if (!placeId && pin) placeId = await placeFromPin(pin);
+      if (!placeId && !pin) {
+        throw new Error("Choose the place where the property is, or drop a pin on the map");
+      }
       if (rent <= 0) throw new Error("Enter the monthly rent");
 
       const { data: property, error } = await supabase
         .from("properties")
         .insert({
           landlord_id: user.id,
-          location_id: locationId,
+          location_id: placeId,
           title: form.title,
           description: form.description || null,
           property_type: form.property_type,
