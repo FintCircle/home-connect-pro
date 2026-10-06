@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as MaptestRouteImport } from './routes/maptest'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAffiliatesRouteImport } from './routes/_authenticated/affiliates'
@@ -38,6 +39,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaptestRoute = MaptestRouteImport.update({
+  id: '/maptest',
+  path: '/maptest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
@@ -111,6 +117,7 @@ const BrowseRegionSlugCitySlugRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/maptest': typeof MaptestRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/affiliates': typeof AuthenticatedAffiliatesRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/maptest': typeof MaptestRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/affiliates': typeof AuthenticatedAffiliatesRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/maptest': typeof MaptestRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/affiliates': typeof AuthenticatedAffiliatesRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/maptest'
     | '/account'
     | '/admin'
     | '/affiliates'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/maptest'
     | '/account'
     | '/admin'
     | '/affiliates'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/maptest'
     | '/_authenticated/account'
     | '/_authenticated/admin'
     | '/_authenticated/affiliates'
@@ -220,6 +232,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  MaptestRoute: typeof MaptestRoute
   BrowseRegionSlugRoute: typeof BrowseRegionSlugRouteWithChildren
   HomesSplatRoute: typeof HomesSplatRoute
   InfoPageRoute: typeof InfoPageRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maptest': {
+      id: '/maptest'
+      path: '/maptest'
+      fullPath: '/maptest'
+      preLoaderRoute: typeof MaptestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/account': {
@@ -380,6 +400,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  MaptestRoute: MaptestRoute,
   BrowseRegionSlugRoute: BrowseRegionSlugRouteWithChildren,
   HomesSplatRoute: HomesSplatRoute,
   InfoPageRoute: InfoPageRoute,
