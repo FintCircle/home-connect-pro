@@ -1,42 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-
-declare global {
-  interface Window {
-    L?: any;
-  }
-}
+import type * as Leaflet from "leaflet";
 
 export type LatLng = { lat: number; lng: number };
 
 const KAMPALA: LatLng = { lat: 0.3476, lng: 32.5825 };
-const LEAFLET = "https://unpkg.com/leaflet@1.9.4/dist";
-
-let loader: Promise<void> | null = null;
-
-function loadLeaflet(): Promise<void> {
-  if (window.L) return Promise.resolve();
-  if (loader) return loader;
-  loader = new Promise((resolve, reject) => {
-    const css = document.createElement("link");
-    css.rel = "stylesheet";
-    css.href = `${LEAFLET}/leaflet.css`;
-    document.head.appendChild(css);
-    const script = document.createElement("script");
-    script.src = `${LEAFLET}/leaflet.js`;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => {
-      loader = null;
-      reject(new Error("map failed to load"));
-    };
-    document.head.appendChild(script);
-  });
-  return loader;
-}
+const MARKER = "https://unpkg.com/leaflet@1.9.4/dist/images";
 
 /**
- * OpenStreetMap picker. Tap the map or drag the pin to mark the exact spot —
- * the fallback when the automatic location is missing or off.
+ * OpenStreetMap picker. Starts on the given coordinates (or the device's
+ * location), and lets the owner tap the map or drag the pin to mark the spot.
  */
 export function MapPicker({
   value,
@@ -48,29 +20,34 @@ export function MapPicker({
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
+  const leafletRef = useRef<typeof Leaflet | null>(null);
+  const mapRef = useRef<Leaflet.Map | null>(null);
+  const markerRef = useRef<Leaflet.Marker | null>(null);
+  const valueRef = useRef(value);
+  valueRef.current = value;
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const [failed, setFailed] = useState(false);
 
   function placeMarker(point: LatLng) {
-    const L = window.L;
+    const L = leafletRef.current;
     const map = mapRef.current;
     if (!L || !map) return;
     if (!markerRef.current) {
       const icon = L.icon({
-        iconUrl: `${LEAFLET}/images/marker-icon.png`,
-        iconRetinaUrl: `${LEAFLET}/images/marker-icon-2x.png`,
-        shadowUrl: `${LEAFLET}/images/marker-shadow.png`,
+        iconUrl: `${MARKER}/marker-icon.png`,
+        iconRetinaUrl: `${MARKER}/marker-icon-2x.png`,
+        shadowUrl: `${MARKER}/marker-shadow.png`,
         iconSize: [25, 41],
         iconAnchor: [12, 41],
+        shadowSize: [41, 41],
       });
-      markerRef.current = L.marker([point.lat, point.lng], { draggable: true, icon }).addTo(map);
-      markerRef.current.on("dragend", () => {
-        const p = markerRef.current.getLatLng();
+      const marker = L.marker([point.lat, point.lng], { draggable: true, icon }).addTo(map);
+      marker.on("dragend", () => {
+        const p = marker.getLatLng();
         onChangeRef.current({ lat: p.lat, lng: p.lng });
       });
+      markerRef.current = marker;
     } else {
       markerRef.current.setLatLng([point.lat, point.lng]);
     }
@@ -78,23 +55,50 @@ export function MapPicker({
 
   useEffect(() => {
     let cancelled = false;
-    loadLeaflet()
-      .then(() => {
+    let observer: ResizeObserver | null = null;
+
+    import("leaflet")
+      .then((mod) => {
+        const L = ((mod as any).default ?? mod) as typeof Leaflet;
         if (cancelled || !containerRef.current || mapRef.current) return;
-        const L = window.L;
-        const center = value ?? KAMPALA;
-        const map = L.map(containerRef.current).setView([center.lat, center.lng], value ? 17 : 12);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        leafletRef.current = L;
+        const start = valueRef.current ?? KAMPALA;
+        const map = L.map(containerRef.current, { zoomControl: true }).setView(
+          [start.lat, start.lng],
+          valueRef.current ? 17 : 13,
+        );
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);
-        map.on("click", (event: any) => onChangeRef.current({ lat: event.latlng.lat, lng: event.latlng.lng }));
+        map.on("click", (event: Leaflet.LeafletMouseEvent) =>
+          onChangeRef.current({ lat: event.latlng.lat, lng: event.latlng.lng }),
+        );
         mapRef.current = map;
-        if (value) placeMarker(value);
+        if (valueRef.current) placeMarker(valueRef.current);
+
+        // The card can change size after mount — keep tiles filling the box.
+        observer = new ResizeObserver(() => map.invalidateSize());
+        observer.observe(containerRef.current);
+        setTimeout(() => map.invalidateSize(), 250);
+
+        // No pin yet: open the map on the device's location when allowed.
+        if (!valueRef.current && "geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              if (cancelled || valueRef.current || !mapRef.current) return;
+              mapRef.current.setView([position.coords.latitude, position.coords.longitude], 16);
+            },
+            () => undefined,
+            { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+          );
+        }
       })
       .catch(() => setFailed(true));
+
     return () => {
       cancelled = true;
+      observer?.disconnect();
       mapRef.current?.remove();
       mapRef.current = null;
       markerRef.current = null;
@@ -120,7 +124,10 @@ export function MapPicker({
 
   return (
     <div className="space-y-1.5">
-      <div ref={containerRef} className={`relative z-0 rounded-xl border border-border ${className}`} />
+      <div
+        ref={containerRef}
+        className={`relative z-0 overflow-hidden rounded-xl border border-border bg-muted ${className}`}
+      />
       <p className="text-xs text-muted-foreground">
         Location off or the pin is wrong? Tap the map to mark the spot, or drag the pin.
       </p>
