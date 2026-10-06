@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Crosshair, ImagePlus, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AppHeader } from "@/components/pangisa/app-header";
@@ -119,20 +119,22 @@ function ListProperty() {
         { headers: { Accept: "application/json" } },
       );
       if (!res.ok) return null;
-      const json = (await res.json()) as { address?: Record<string, string> };
+      const json = (await res.json()) as { address?: Record<string, string>; display_name?: string };
       const address = json.address ?? {};
       const keys = ["neighbourhood", "suburb", "quarter", "hamlet", "village", "city_district", "town", "municipality", "city", "county", "state_district"];
       const norm = (s: string) => s.toLowerCase().replace(/\b(division|municipality|town council|city|district|county)\b/g, "").replace(/[^a-z0-9]+/g, "");
-      for (const key of keys) {
-        const name = address[key];
-        if (!name) continue;
+      const names = [
+        ...keys.map((key) => address[key]),
+        ...(json.display_name ?? "").split(",").map((part) => part.trim()),
+      ].filter((name): name is string => Boolean(name));
+      for (const name of names) {
         const target = norm(name);
         if (!target) continue;
         const matches = rows.filter((row) => row.is_active && norm(row.name) === target);
         if (matches.length) {
           // Prefer the most specific (deepest) match.
           matches.sort((a, b) => (b.full_path?.split("/").length ?? 0) - (a.full_path?.split("/").length ?? 0));
-          return matches[0].id;
+          return matches[0]?.id ?? null;
         }
       }
     } catch {
